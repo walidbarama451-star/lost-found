@@ -1,0 +1,546 @@
+openapi: 3.0.3
+info:
+  title: Lost & Found API
+  version: 1.0.0
+  description: |
+    REST API for the Lost & Found platform.
+
+    Authentication uses a short-lived JWT stored in an **HttpOnly cookie**
+    (`lost_and_found_token`). Send `credentials: 'include'` from the browser;
+    no token appears in JavaScript or in response bodies.
+
+    All responses share one envelope:
+    - success: `{ "success": true, "data": ..., "message"?: "..." }`
+    - failure: `{ "success": false, "message": "...", "errors": [{ "field", "message" }] }`
+servers:
+  - url: http://localhost:5000/api
+    description: Local development
+tags:
+  - name: auth
+  - name: users
+  - name: items
+  - name: claims
+  - name: notifications
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: lost_and_found_token
+  parameters:
+    itemId:
+      name: itemId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-f\d]{24}$' }
+    claimId:
+      name: claimId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-f\d]{24}$' }
+    notificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-f\d]{24}$' }
+    page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    limit:
+      name: limit
+      in: query
+      description: Clamped to a maximum of 50.
+      schema: { type: integer, minimum: 1, default: 12 }
+  schemas:
+    Error:
+      type: object
+      required: [success, message]
+      properties:
+        success: { type: boolean, enum: [false] }
+        message: { type: string }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              message: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string, minLength: 3, maxLength: 30 }
+        email: { type: string, format: email }
+        phone: { type: string }
+        avatarUrl: { type: string }
+        createdAt: { type: string, format: date-time }
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+    ItemLocation:
+      type: object
+      required: [label]
+      properties:
+        label: { type: string }
+        city: { type: string }
+        region: { type: string }
+        country: { type: string }
+    ItemImage:
+      type: object
+      properties:
+        url: { type: string }
+        publicId:
+          type: string
+          description: Owner responses only; never exposed publicly.
+    PublicItem:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        category:
+          type: string
+          enum: [ELECTRONICS, DOCUMENTS, KEYS, BAGS, ACCESSORIES, CLOTHING, JEWELRY, PETS, OTHER]
+        images:
+          type: array
+          items: { $ref: '#/components/schemas/ItemImage' }
+        location: { $ref: '#/components/schemas/ItemLocation' }
+        dateFound: { type: string, format: date-time }
+        status: { type: string, enum: [ACTIVE, CLAIMED, RETURNED, CLOSED, HIDDEN] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        owner:
+          type: object
+          properties:
+            id: { type: string }
+            username: { type: string }
+    OwnerItem:
+      allOf:
+        - $ref: '#/components/schemas/PublicItem'
+        - type: object
+          properties:
+            acceptedClaim: { type: string, nullable: true }
+            returnedAt: { type: string, format: date-time, nullable: true }
+    Claim:
+      type: object
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [PENDING, ACCEPTED, REJECTED, WITHDRAWN] }
+        message:
+          type: string
+          description: Private proof details — visible only to claimant and listing owner.
+        createdAt: { type: string, format: date-time }
+        decisionAt: { type: string, format: date-time, nullable: true }
+        claimant:
+          type: object
+          properties:
+            id: { type: string }
+            username: { type: string }
+        item:
+          type: object
+          properties:
+            id: { type: string }
+            title: { type: string }
+            status: { type: string }
+            thumbnail: { type: string, nullable: true }
+    Notification:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [CLAIM_SUBMITTED, CLAIM_ACCEPTED, CLAIM_REJECTED, ITEM_RETURNED] }
+        title: { type: string }
+        message: { type: string }
+        relatedItem: { type: string, nullable: true }
+        relatedClaim: { type: string, nullable: true }
+        read: { type: boolean }
+        readAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+  responses:
+    BadRequest:
+      description: Validation failed — `errors` lists field-level problems
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string, minLength: 3, maxLength: 30 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          description: Account created; session cookie set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { description: Email already registered }
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Signed in; session cookie set
+        '401': { description: Generic invalid-credentials error }
+        '429': { description: Rate limit exceeded }
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Current user
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200':
+          description: Safe profile of the signed-in user
+        '401': { description: Not authenticated }
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Clear the session cookie
+      responses:
+        '200': { description: Signed out }
+  /users/me:
+    get:
+      tags: [users]
+      summary: Get own profile
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Safe profile }
+        '401': { description: Not authenticated }
+    patch:
+      tags: [users]
+      summary: Update allowed profile fields (never role)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, minLength: 3, maxLength: 30 }
+                email: { type: string, format: email }
+                phone: { type: string }
+                avatarUrl: { type: string, format: uri }
+      responses:
+        '200': { description: Updated profile }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { description: Email already in use }
+
+  /items:
+    get:
+      tags: [items]
+      summary: Browse/search ACTIVE listings
+      parameters:
+        - name: q
+          in: query
+          description: Case-insensitive match on title and description (regex-safe).
+          schema: { type: string, maxLength: 200 }
+        - name: category
+          in: query
+          schema: { type: string, enum: [ELECTRONICS, DOCUMENTS, KEYS, BAGS, ACCESSORIES, CLOTHING, JEWELRY, PETS, OTHER] }
+        - name: city
+          in: query
+          schema: { type: string }
+        - name: fromDate
+          in: query
+          schema: { type: string, format: date }
+        - name: toDate
+          in: query
+          schema: { type: string, format: date }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [newest, oldest], default: newest }
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Paginated public listings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/PublicItem' }
+                      pagination: { $ref: '#/components/schemas/Pagination' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+    post:
+      tags: [items]
+      summary: "Publish a found item (multipart: fields + images)"
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, description, category, locationLabel, dateFound, images]
+              properties:
+                title: { type: string, minLength: 3, maxLength: 120 }
+                description: { type: string, minLength: 10, maxLength: 5000 }
+                category: { type: string }
+                locationLabel: { type: string, maxLength: 120 }
+                locationCity: { type: string, maxLength: 80 }
+                locationRegion: { type: string, maxLength: 80 }
+                locationCountry: { type: string, maxLength: 80 }
+                dateFound: { type: string, format: date, description: 'YYYY-MM-DD, not in the future' }
+                images:
+                  type: array
+                  maxItems: 5
+                  items: { type: string, format: binary }
+      responses:
+        '201': { description: Listing published (status ACTIVE) }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { description: Not authenticated }
+        '413': { description: Image larger than 5 MB }
+        '415': { description: Unsupported image type/content }
+
+  /items/mine:
+    get:
+      tags: [items]
+      summary: Current user's listings (all statuses)
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [ACTIVE, CLAIMED, RETURNED, CLOSED, HIDDEN] }
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200': { description: Paginated owner listings }
+        '401': { description: Not authenticated }
+
+  /items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+    get:
+      tags: [items]
+      summary: Public listing detail (HIDDEN returns 404)
+      responses:
+        '200': { description: Listing detail }
+        '404': { description: Not found }
+    patch:
+      tags: [items]
+      summary: Update own listing (owner only)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Any subset of the create fields; `createdBy`/`status` are never accepted.
+      responses:
+        '200': { description: Updated owner listing }
+        '403': { description: Not the owner }
+        '404': { description: Not found }
+    delete:
+      tags: [items]
+      summary: Soft-close own listing (status CLOSED)
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Listing closed }
+        '403': { description: Not the owner }
+        '409': { description: Returned listing cannot be closed }
+
+  /items/{itemId}/return:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+    patch:
+      tags: [items]
+      summary: Owner marks a CLAIMED listing as RETURNED
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Marked returned }
+        '409': { description: No accepted claim on the listing }
+
+  /items/{itemId}/images:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+    post:
+      tags: [items]
+      summary: Owner adds images (max 5 per listing)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  maxItems: 5
+                  items: { type: string, format: binary }
+      responses:
+        '200': { description: Images added }
+        '409': { description: Listing already has 5 images }
+
+  /items/{itemId}/images/{publicId}:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+      - name: publicId
+        in: path
+        required: true
+        description: URL-encoded provider asset id (the last image cannot be removed).
+        schema: { type: string }
+    delete:
+      tags: [items]
+      summary: Owner removes one image
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Image removed }
+        '404': { description: Image not on listing }
+        '409': { description: A listing must keep at least one image }
+
+  /items/{itemId}/claims:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/limit'
+    get:
+      tags: [claims]
+      summary: Claims on own listing (owner only, else 403)
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Paginated claims with claimant display names }
+        '403': { description: Not the owner }
+
+  /claims:
+    post:
+      tags: [claims]
+      summary: Submit a private claim
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemId, message]
+              properties:
+                itemId: { type: string }
+                message: { type: string, minLength: 10, maxLength: 2000 }
+      responses:
+        '201': { description: Claim created (PENDING) }
+        '403': { description: Claiming own listing }
+        '409': { description: Duplicate pending claim or listing not ACTIVE }
+        '429': { description: Rate limit exceeded }
+
+  /claims/mine:
+    get:
+      tags: [claims]
+      summary: Claims submitted by the current user
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200': { description: Paginated claims }
+
+  /claims/{claimId}/decision:
+    parameters:
+      - $ref: '#/components/parameters/claimId'
+    patch:
+      tags: [claims]
+      summary: Owner accepts or rejects a pending claim (atomic)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [ACCEPTED, REJECTED] }
+      responses:
+        '200': { description: Decision recorded; claimant notified }
+        '403': { description: Not the listing owner }
+        '409': { description: Claim already decided or listing no longer claimable }
+
+  /claims/{claimId}/withdraw:
+    parameters:
+      - $ref: '#/components/parameters/claimId'
+    patch:
+      tags: [claims]
+      summary: Claimant withdraws their own pending claim
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Withdrawn }
+        '403': { description: Not the claimant }
+        '409': { description: Not pending }
+
+  /notifications:
+    get:
+      tags: [notifications]
+      summary: Own notifications, newest first
+      security: [{ sessionCookie: [] }]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, default: 20 }
+      responses:
+        '200':
+          description: Paginated notifications plus `unreadCount`
+        '401': { description: Not authenticated }
+
+  /notifications/{notificationId}/read:
+    parameters:
+      - $ref: '#/components/parameters/notificationId'
+    patch:
+      tags: [notifications]
+      summary: Mark one own notification as read
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Marked read }
+        '404': { description: Not found (or not yours) }
+
+  /notifications/read-all:
+    patch:
+      tags: [notifications]
+      summary: Mark all own notifications as read
+      security: [{ sessionCookie: [] }]
+      responses:
+        '200': { description: Count of updated notifications }

@@ -1,0 +1,25 @@
+import { z } from 'zod';
+
+export const updateProfileSchema = z
+  .object({
+    username: z.string().trim().min(3, 'Username must be at least 3 characters').max(30).optional(),
+    email: z.string().trim().email('Enter a valid email').max(254).optional(),
+    phone: z
+      .string()
+      .trim()
+      .max(30, 'Phone number is too long')
+      .optional()
+      .or(z.literal('').transform(() => undefined)),
+    avatarUrl: z
+      .string()
+      .trim()
+      .max(500)
+      .url('Avatar must be a valid URL')
+      .optional()
+      .or(z.literal('').transform(() => undefined)),
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: 'Provide at least one field to update',
+  });
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
