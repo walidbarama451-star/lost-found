@@ -1,0 +1,16 @@
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid #f0c4cc;
+  background: var(--status-danger-bg);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.error-state__message {
+  color: var(--status-danger);
+  font-weight: 500;
+}

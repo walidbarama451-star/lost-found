@@ -1,0 +1,123 @@
+.item-detail__breadcrumb {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.item-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.item-detail__hero {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.item-detail__hero--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.item-detail__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+
+.item-detail__thumb {
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--surface-muted);
+}
+
+.item-detail__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-detail__thumb--active {
+  border-color: var(--color-primary);
+}
+
+.item-detail__info {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.item-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.item-detail__category {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  padding: 0.1rem 0.55rem;
+  border-radius: var(--radius-pill);
+}
+
+.item-detail__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.item-detail__meta dt {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.item-detail__meta dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.item-detail__description h2 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}
+
+.item-detail__owner-actions h2 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}
+
+.item-detail__claim {
+  margin-top: var(--space-5);
+}
+
+.item-detail__signin {
+  margin-top: var(--space-5);
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .item-detail__grid {
+    grid-template-columns: 1fr;
+  }
+}

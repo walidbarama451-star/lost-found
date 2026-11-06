@@ -1,0 +1,30 @@
+.home-page__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  margin-bottom: var(--space-5);
+  background: linear-gradient(135deg, var(--color-primary-soft), var(--surface-card));
+  border: 1px solid #d8e7e2;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  align-items: center;
+}
+
+.home-page__hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+}
+
+.home-page__hero .item-search-bar {
+  max-width: 34rem;
+}
+
+.home-page__results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-4);
+}

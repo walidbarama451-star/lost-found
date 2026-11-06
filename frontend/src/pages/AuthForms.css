@@ -1,0 +1,24 @@
+.auth-forms {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--space-5);
+}
+
+.auth-forms__card {
+  width: 100%;
+  max-width: 26rem;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-forms__card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-forms__switch {
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

@@ -1,0 +1,22 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-layout__main {
+  flex: 1;
+  padding-block: var(--space-5);
+}
+
+.app-layout__footer {
+  margin-top: var(--space-6);
+  padding-block: var(--space-5);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  font-size: var(--font-size-sm);
+}
+
+.app-layout__footer a {
+  color: #9fd8c9;
+}

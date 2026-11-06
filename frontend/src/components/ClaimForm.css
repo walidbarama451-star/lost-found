@@ -1,0 +1,28 @@
+.claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--surface-card);
+  border: 1px solid #e2e6e3;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.claim-form__title {
+  font-size: var(--font-size-lg);
+}
+
+.claim-form__privacy {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-strong);
+}
+
+.claim-form--done {
+  align-items: flex-start;
+}

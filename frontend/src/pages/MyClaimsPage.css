@@ -1,0 +1,56 @@
+.my-claims__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.my-claims__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.my-claims__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.my-claims__title {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--text-strong);
+}
+
+.my-claims__message {
+  font-size: var(--font-size-sm);
+}
+
+.my-claims__info .muted {
+  font-size: var(--font-size-sm);
+}
+
+.my-claims__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.my-claims__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.my-claims .pagination {
+  margin-top: var(--space-5);
+}
