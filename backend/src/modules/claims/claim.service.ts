@@ -15,11 +15,6 @@ function isDuplicateKey(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as { code?: number }).code === 11000;
 }
 
-/**
- * Submits a private claim. All ownership and state rules from spec 08 are
- * checked here; the partial unique index is the database-level backstop for
- * "one pending claim per claimant per listing".
- */
 export async function submitClaim(userId: string, itemId: string, message: string): Promise<ClaimOnItemDto> {
   const item = await Item.findById(itemId);
   if (!item) throw AppError.notFound('Listing not found');
@@ -50,7 +45,6 @@ export async function submitClaim(userId: string, itemId: string, message: strin
   return toClaimOnItemDto(claim as unknown as Parameters<typeof toClaimOnItemDto>[0]);
 }
 
-/** Claims submitted by the current user, newest first. */
 export async function listMyClaims(
   userId: string,
   query: { page?: number; limit?: number },
@@ -73,7 +67,6 @@ export async function listMyClaims(
   };
 }
 
-/** Claims on one of the current user's own listings (owner only). */
 export async function listClaimsForItem(
   userId: string,
   itemId: string,
@@ -114,15 +107,6 @@ async function loadClaimOwnedBy(claimId: string, userId: string): Promise<ClaimR
 
   return claim;
 }
-
-/**
- * Owner accepts or rejects a pending claim.
- *
- * Local MongoDB has no multi-document transactions, so consistency is
- * achieved with guarded atomic updates plus a compensating revert: each
- * conditional update only matches the expected prior state, which guarantees
- * at most one ACCEPTED claim per listing even under concurrent decisions.
- */
 export async function decideClaim(
   userId: string,
   claimId: string,
@@ -150,8 +134,6 @@ export async function decideClaim(
     return { id: updated._id.toString(), status: updated.status };
   }
 
-  // --- ACCEPT ------------------------------------------------------------
-  // Step 1: guard the claim (PENDING -> ACCEPTED).
   const accepted = await Claim.findOneAndUpdate(
     { _id: claim._id, status: 'PENDING' },
     { $set: { status: 'ACCEPTED', decisionAt: new Date() } },
@@ -159,7 +141,6 @@ export async function decideClaim(
   );
   if (!accepted) throw AppError.conflict('This claim has already been decided');
 
-  // Step 2: guard the listing (ACTIVE + no accepted claim -> CLAIMED).
   const updatedItem = await Item.findOneAndUpdate(
     { _id: claim.item, status: 'ACTIVE', acceptedClaim: null },
     { $set: { status: 'CLAIMED', acceptedClaim: accepted._id } },
@@ -167,7 +148,6 @@ export async function decideClaim(
   );
 
   if (!updatedItem) {
-    // Compensate: the listing is no longer claimable, so undo step 1.
     await Claim.updateOne(
       { _id: accepted._id, status: 'ACCEPTED' },
       { $set: { status: 'PENDING', decisionAt: null } },
@@ -187,7 +167,6 @@ export async function decideClaim(
   return { id: accepted._id.toString(), status: accepted.status };
 }
 
-/** Claimant withdraws their own pending claim. */
 export async function withdrawClaim(
   userId: string,
   claimId: string,

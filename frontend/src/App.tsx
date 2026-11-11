@@ -15,6 +15,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
+import UserProfilePage from './pages/UserProfilePage';
 
 /**
  * Application routes (spec 11). Public: `/`, `/items/:itemId`, `/register`,
@@ -94,6 +95,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId"
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
               </ProtectedRoute>
             }
           />

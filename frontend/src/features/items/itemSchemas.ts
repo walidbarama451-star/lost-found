@@ -16,14 +16,6 @@ const isNotInTheFuture = (value: string): boolean => {
 
 const dateFound = datePattern.refine(isNotInTheFuture, 'Date found cannot be in the future');
 
-/** Empty values become undefined, exactly like the backend preprocess. */
-function optionalText(max: number) {
-  return z.preprocess(
-    (value) => (value === '' || value === null || value === undefined ? undefined : value),
-    z.string().trim().max(max, `Must be at most ${max} characters`).optional(),
-  );
-}
-
 export const itemSchema = z.object({
   title: z.string().trim().min(3, 'Title must be at least 3 characters').max(120),
   description: z
@@ -35,10 +27,6 @@ export const itemSchema = z.object({
     .string()
     .min(1, 'Choose a category')
     .refine((value) => (CATEGORIES as string[]).includes(value), 'Choose a category'),
-  locationLabel: z.string().trim().min(1, 'Describe the approximate location').max(120),
-  locationCity: optionalText(80),
-  locationRegion: optionalText(80),
-  locationCountry: optionalText(80),
   dateFound,
 });
 
@@ -46,10 +34,6 @@ export type ItemFormValues = {
   title: string;
   description: string;
   category: string;
-  locationLabel: string;
-  locationCity: string;
-  locationRegion: string;
-  locationCountry: string;
   dateFound: string;
 };
 
@@ -57,9 +41,5 @@ export const emptyItemValues: ItemFormValues = {
   title: '',
   description: '',
   category: '',
-  locationLabel: '',
-  locationCity: '',
-  locationRegion: '',
-  locationCountry: '',
   dateFound: '',
 };

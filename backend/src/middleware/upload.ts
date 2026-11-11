@@ -7,10 +7,6 @@ export const MAX_IMAGES_PER_LISTING = 5;
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
-/**
- * Multipart parser for listing images: in-memory storage, strict MIME type
- * allow-list, per-file size cap and file-count cap.
- */
 export const uploadImages = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_IMAGE_BYTES, files: MAX_IMAGES_PER_LISTING },
@@ -23,7 +19,6 @@ export const uploadImages = multer({
   },
 });
 
-/** Detects the real image type from file content (magic bytes). */
 export function sniffImageType(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return 'image/jpeg';
@@ -51,10 +46,6 @@ export function sniffImageType(buffer: Buffer): 'image/jpeg' | 'image/png' | 'im
   return null;
 }
 
-/**
- * Rejects uploads whose actual bytes do not match an allowed image format —
- * a browser-provided MIME type or file extension alone is never trusted.
- */
 export function assertImageContent(req: Request, _res: Response, next: NextFunction): void {
   const files = req.files as Express.Multer.File[] | undefined;
   if (!files || files.length === 0) {

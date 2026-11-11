@@ -1,9 +1,8 @@
 import type { Types } from 'mongoose';
-import type { ItemDoc, ItemLocation, ItemRecord, ItemStatus } from './item.model.js';
+import type { ItemDoc, ItemRecord, ItemStatus } from './item.model.js';
 
 export interface ItemImageDto {
   url: string;
-  /** Present only in owner-scoped responses; used to manage images. */
   publicId?: string;
 }
 
@@ -13,7 +12,6 @@ export interface ItemDto {
   description: string;
   category: string;
   images: ItemImageDto[];
-  location: ItemLocation;
   dateFound: string;
   status: ItemStatus;
   createdAt: string;
@@ -43,7 +41,6 @@ function baseDto(item: PopulatedItem): ItemDto {
     description: item.description,
     category: item.category,
     images: item.images.map((image) => ({ url: image.url })),
-    location: item.location,
     dateFound: item.dateFound.toISOString(),
     status: item.status,
     createdAt: item.createdAt.toISOString(),
@@ -52,12 +49,10 @@ function baseDto(item: PopulatedItem): ItemDto {
   };
 }
 
-/** Public listing projection — never includes images' publicIds or claim data. */
 export function toPublicItem(item: PopulatedItem): ItemDto {
   return baseDto(item);
 }
 
-/** Owner-scoped projection — includes publicIds for image management. */
 export function toOwnerItem(item: PopulatedItem): ItemDto {
   const dto = baseDto(item);
   dto.images = item.images.map((image) => ({ url: image.url, publicId: image.publicId }));

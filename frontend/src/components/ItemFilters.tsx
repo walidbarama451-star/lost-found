@@ -5,7 +5,6 @@ import './ItemFilters.css';
 
 export interface ItemFilterValues {
   category: string;
-  city: string;
   fromDate: string;
   toDate: string;
   sort: 'newest' | 'oldest';
@@ -18,7 +17,7 @@ interface ItemFiltersProps {
   onClear: () => void;
 }
 
-/** Category / city / date-range / sort controls (spec 11). */
+/** Category / date-range / sort controls (spec 11). */
 export default function ItemFilters({ values, onChange, onApply, onClear }: ItemFiltersProps) {
   const set = (patch: Partial<ItemFilterValues>) => onChange({ ...values, ...patch });
 
@@ -46,20 +45,6 @@ export default function ItemFilters({ values, onChange, onApply, onClear }: Item
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="item-filters__field">
-        <label className="form-label" htmlFor="filter-city">
-          City
-        </label>
-        <input
-          id="filter-city"
-          className="form-control"
-          type="text"
-          placeholder="e.g. Algiers"
-          value={values.city}
-          onChange={(event) => set({ city: event.target.value })}
-        />
       </div>
 
       <div className="item-filters__field">

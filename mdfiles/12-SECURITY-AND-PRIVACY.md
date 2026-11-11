@@ -37,7 +37,6 @@
 
 ## Privacy
 
-- Public item location should be approximate, not a home address.
 - Keep claim messages private.
 - Do not publish private phone numbers or email addresses by default.
 - Avoid exposing identifying proof details in listing text or notifications.

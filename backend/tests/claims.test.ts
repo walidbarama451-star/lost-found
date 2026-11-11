@@ -4,10 +4,7 @@ import { app, createItem, registerUser, submitClaim, type TestUser } from './hel
 
 async function listItem(itemId: string) {
   const res = await request(app).get(`/api/items/${itemId}`);
-  return res.body.data.item as {
-    status: string;
-    images: { url: string; publicId?: string }[];
-  };
+  return res.body.data.item as { status: string };
 }
 
 describe('claim submission', () => {

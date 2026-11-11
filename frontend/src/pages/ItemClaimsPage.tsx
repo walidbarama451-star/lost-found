@@ -8,7 +8,7 @@ import LoadingState from '../components/LoadingState';
 import Pagination from '../components/Pagination';
 import { decideClaim, listClaimsOnItem } from '../features/claims/claimsService';
 import { getItem } from '../features/items/itemsService';
-import { formatDate, formatLocation } from '../lib/format';
+import { formatDate } from '../lib/format';
 import { toDisplayError } from '../lib/validation';
 import { useApi } from '../lib/useApi';
 import type { ClaimOnItem, PublicItem } from '../types';
@@ -63,7 +63,7 @@ export default function ItemClaimsPage() {
       <div className="page-header">
         <div>
           <h1>Claims on “{item.title}”</h1>
-          <p className="muted">{formatLocation(item.location)} · Found {formatDate(item.dateFound)}</p>
+          <p className="muted">Found {formatDate(item.dateFound)}</p>
         </div>
         <div className="row">
           <Link className="btn btn-secondary btn-sm" to={`/items/${item.id}`}>

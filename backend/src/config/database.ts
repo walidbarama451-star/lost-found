@@ -10,7 +10,6 @@ export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
 }
 
-/** Deletes every document in the connected database (test helper). */
 export async function clearDatabase(): Promise<void> {
   const collections = Object.values(mongoose.connection.collections);
   await Promise.all(collections.map((collection) => collection.deleteMany({})));

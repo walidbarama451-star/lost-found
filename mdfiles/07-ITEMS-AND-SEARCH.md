@@ -21,7 +21,6 @@ Required:
 - title
 - description
 - category
-- location (approximate)
 - dateFound
 - at least one valid image, if the MVP requires photos
 
@@ -55,7 +54,6 @@ Return:
 - description
 - category
 - image URLs
-- approximate location
 - dateFound
 - status
 - createdAt
@@ -73,7 +71,6 @@ Do not return:
 Supported query parameters:
 - `q`: text search.
 - `category`: exact category.
-- `city`: city label.
 - `fromDate`, `toDate`: date range.
 - `page`, `limit`: pagination.
 - `sort`: `newest` or `oldest`.

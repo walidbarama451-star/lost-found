@@ -2,7 +2,6 @@ import rateLimit from 'express-rate-limit';
 
 const jsonMessage = (message: string) => ({ success: false as const, message, errors: [] });
 
-/** Limits sign-in / registration attempts per IP. */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
@@ -11,7 +10,6 @@ export const authLimiter = rateLimit({
   message: jsonMessage('Too many attempts, please try again later'),
 });
 
-/** Limits claim creation per IP (abuse prevention). */
 export const claimLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 60,
@@ -20,7 +18,6 @@ export const claimLimiter = rateLimit({
   message: jsonMessage('Too many claims submitted, please try again later'),
 });
 
-/** Limits image uploads per IP. */
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 120,

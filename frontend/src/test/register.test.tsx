@@ -13,6 +13,7 @@ import RegisterPage from '../pages/RegisterPage';
 const USER = {
   id: 'u1',
   username: 'walid',
+  discordUsername: 'walid_discord',
   email: 'walid@example.com',
   createdAt: '2026-01-01T00:00:00.000Z',
 };
@@ -62,6 +63,7 @@ describe('RegisterPage validation', () => {
     renderRegister();
 
     await user.type(screen.getByLabelText('Username'), 'ab');
+    await user.type(screen.getByLabelText(/Discord username/), 'x');
     await user.type(screen.getByLabelText('Email'), 'not-an-email');
     await user.type(screen.getByLabelText('Password'), 'short');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
@@ -70,6 +72,11 @@ describe('RegisterPage validation', () => {
     expect(
       await screen.findByText('Username must be at least 3 characters', {
         selector: '#register-username-error',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText('Discord username must be at least 2 characters', {
+        selector: '#register-discord-username-error',
       }),
     ).toBeInTheDocument();
     expect(
@@ -104,6 +111,7 @@ describe('RegisterPage validation', () => {
     renderRegister();
 
     await user.type(screen.getByLabelText('Username'), 'walid');
+    await user.type(screen.getByLabelText(/Discord username/), 'walid_discord');
     await user.type(screen.getByLabelText('Email'), 'walid@example.com');
     await user.type(screen.getByLabelText('Password'), 'supersecret1');
     await user.click(screen.getByRole('button', { name: 'Create account' }));

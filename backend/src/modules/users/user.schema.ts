@@ -10,6 +10,13 @@ export const updateProfileSchema = z
       .max(30, 'Phone number is too long')
       .optional()
       .or(z.literal('').transform(() => undefined)),
+    discordUsername: z
+      .string()
+      .trim()
+      .min(2, 'Discord username must be at least 2 characters')
+      .max(32, 'Discord username must be at most 32 characters')
+      .optional()
+      .or(z.literal('')),
     avatarUrl: z
       .string()
       .trim()

@@ -7,8 +7,8 @@ Built with TypeScript on both sides — React (Vite) in the browser, an Express 
 ## Features (MVP)
 
 - **Accounts** — register, sign in, sign out, and edit your profile. Passwords are bcrypt-hashed and never leave the server; sessions live in an **HttpOnly cookie** (no tokens in JavaScript).
-- **Listings** — publish a found item with 1–5 photos, category, approximate location, and date found. Owners edit or soft-close only their own listings.
-- **Browse & search** — public, paginated search by keyword, category, city, and date range (regex-safe, whitelisted filters).
+- **Listings** — publish a found item with 1–5 photos, category, and date found. Owners edit or soft-close only their own listings.
+- **Browse & search** — public, paginated search by keyword, category, and date range (regex-safe, whitelisted filters).
 - **Claims** — a signed-in user privately explains why an item is theirs. The message is visible only to the claimant and the listing owner. Owners accept or reject; acceptance is an **atomic, race-safe state transition** (exactly one accepted claim per listing).
 - **Recovery flow** — accepted claim → listing `CLAIMED` → owner marks `RETURNED`.
 - **Notifications** — in-app notifications for claim submitted/accepted/rejected and item returned, with unread counts and mark-read.
@@ -103,7 +103,7 @@ Base URL `http://localhost:5000/api` — full contract in [`docs/openapi.yaml`](
 | Area | Endpoints |
 |---|---|
 | Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` |
-| Profile | `GET /users/me`, `PATCH /users/me` |
+| Profile | `GET /users/me`, `PATCH /users/me`, `GET /users/:userId` (public profile: username + Discord) |
 | Items | `GET /items`, `POST /items`, `GET /items/mine`, `GET /items/:id`, `PATCH /items/:id`, `DELETE /items/:id`, `PATCH /items/:id/return`, `POST /items/:id/images`, `DELETE /items/:id/images/:publicId` |
 | Claims | `POST /claims`, `GET /claims/mine`, `GET /items/:id/claims`, `PATCH /claims/:id/decision`, `PATCH /claims/:id/withdraw` |
 | Notifications | `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all` |

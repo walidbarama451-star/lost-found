@@ -24,15 +24,12 @@ import {
 
 export const itemsRouter = Router();
 
-// --- Public ---------------------------------------------------------------
 itemsRouter.get('/', validate(listItemsQuerySchema, 'query'), listItems);
 
-// --- Owner-scoped (registered before /:itemId so "mine" never matches it) --
 itemsRouter.get('/mine', authenticate, validate(myItemsQuerySchema, 'query'), listMine);
 itemsRouter.get('/:itemId/claims', authenticate, getItemClaims);
 itemsRouter.get('/:itemId', getItem);
 
-// --- Creation: multipart/form-data (JSON fields + image files) ------------
 itemsRouter.post(
   '/',
   authenticate,

@@ -3,6 +3,7 @@ import { Schema, model, type HydratedDocument, type Model, type Types } from 'mo
 export interface UserRecord {
   _id: Types.ObjectId;
   username: string;
+  discordUsername?: string;
   email: string;
   /** Never returned by any API response. */
   passwordHash: string;
@@ -16,6 +17,7 @@ export interface UserRecord {
 const userSchema = new Schema<UserRecord>(
   {
     username: { type: String, required: true, trim: true, minlength: 3, maxlength: 30 },
+    discordUsername: { type: String, trim: true, minlength: 2, maxlength: 32 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
     passwordHash: { type: String, required: true, select: false },
     phone: { type: String, trim: true, maxlength: 30 },
@@ -31,6 +33,7 @@ export type UserDoc = HydratedDocument<UserRecord>;
 export interface SafeUser {
   id: string;
   username: string;
+  discordUsername?: string;
   email: string;
   phone?: string;
   avatarUrl?: string;
@@ -45,9 +48,31 @@ export function toSafeUser(user: UserDoc): SafeUser {
     email: user.email,
     createdAt: user.createdAt,
   };
+  if (user.discordUsername) safe.discordUsername = user.discordUsername;
   if (user.phone) safe.phone = user.phone;
   if (user.avatarUrl) safe.avatarUrl = user.avatarUrl;
   return safe;
+}
+
+/** What a signed-in user may learn about another account (no email/phone). */
+export interface PublicUser {
+  id: string;
+  username: string;
+  discordUsername?: string;
+  avatarUrl?: string;
+  createdAt: Date;
+}
+
+/** Maps a user document to the shape other users' profile pages may show. */
+export function toPublicUser(user: UserDoc): PublicUser {
+  const pub: PublicUser = {
+    id: user._id.toString(),
+    username: user.username,
+    createdAt: user.createdAt,
+  };
+  if (user.discordUsername) pub.discordUsername = user.discordUsername;
+  if (user.avatarUrl) pub.avatarUrl = user.avatarUrl;
+  return pub;
 }
 
 export const User: Model<UserRecord> = model('User', userSchema);

@@ -9,10 +9,6 @@ function buildFormData(values: ItemFormValues, files: File[]): FormData {
   form.append('title', values.title);
   form.append('description', values.description);
   form.append('category', values.category);
-  form.append('locationLabel', values.locationLabel);
-  if (values.locationCity) form.append('locationCity', values.locationCity);
-  if (values.locationRegion) form.append('locationRegion', values.locationRegion);
-  if (values.locationCountry) form.append('locationCountry', values.locationCountry);
   form.append('dateFound', values.dateFound);
   for (const file of files) form.append('images', file);
   return form;
@@ -33,9 +29,7 @@ export default function ItemCreatePage() {
       <div className="page-header">
         <div>
           <h1>Post a found item</h1>
-          <p className="muted">
-            Add a clear photo and an approximate location — never a private address.
-          </p>
+          <p className="muted">Add a clear photo and useful details about the item.</p>
         </div>
       </div>
 

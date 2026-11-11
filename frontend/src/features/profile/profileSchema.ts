@@ -11,6 +11,14 @@ export const profileSchema = z
       .max(30, 'Username must be at most 30 characters'),
     email: z.string().trim().email('Enter a valid email').max(254),
     phone: z.string().trim().max(30, 'Phone number is too long'),
+    discordUsername: z
+      .string()
+      .trim()
+      .max(32, 'Discord username must be at most 32 characters')
+      .refine(
+        (value) => value === '' || value.length >= 2,
+        'Discord username must be at least 2 characters',
+      ),
     avatarUrl: z
       .string()
       .trim()

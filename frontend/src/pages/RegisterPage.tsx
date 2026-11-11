@@ -13,6 +13,7 @@ export default function RegisterPage() {
 
   const [values, setValues] = useState<RegisterInput>({
     username: '',
+    discordUsername: '',
     email: '',
     password: '',
   });
@@ -92,6 +93,31 @@ export default function RegisterPage() {
             {errorFor('username') ? (
               <p className="form-error" id="register-username-error">
                 {errorFor('username')}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="form-field">
+            <label className="form-label" htmlFor="register-discord-username">
+              Discord username <span className="muted">(optional)</span>
+            </label>
+            <input
+              id="register-discord-username"
+              className="form-control"
+              type="text"
+              autoComplete="off"
+              value={values.discordUsername}
+              onChange={(event) => set({ discordUsername: event.target.value })}
+              aria-invalid={Boolean(errorFor('discordUsername'))}
+              aria-describedby={
+                errorFor('discordUsername') ? 'register-discord-username-error' : undefined
+              }
+              minLength={2}
+              maxLength={32}
+            />
+            {errorFor('discordUsername') ? (
+              <p className="form-error" id="register-discord-username-error">
+                {errorFor('discordUsername')}
               </p>
             ) : null}
           </div>

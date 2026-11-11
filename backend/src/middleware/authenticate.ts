@@ -5,11 +5,6 @@ import { AUTH_COOKIE } from '../modules/auth/cookie.js';
 import { findUserById } from '../modules/users/user.service.js';
 import { AppError } from '../shared/errors/AppError.js';
 
-/**
- * Verifies the HttpOnly auth cookie, loads the user and attaches it to the
- * request. The acting user identity always comes from this verified
- * credential — never from client-supplied fields.
- */
 export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const token = req.cookies?.[AUTH_COOKIE];

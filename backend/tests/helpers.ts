@@ -33,16 +33,18 @@ export function jpegBuffer(fill = 64): Buffer {
 export interface TestUser {
   id: string;
   username: string;
+  discordUsername: string;
   email: string;
   cookie: string;
 }
 
 /** Registers a user and returns their identity plus session cookie. */
 export async function registerUser(
-  overrides: Partial<{ username: string; email: string; password: string }> = {},
+  overrides: Partial<{ username: string; discordUsername: string; email: string; password: string }> = {},
 ): Promise<TestUser> {
   const payload = {
     username: 'user',
+    discordUsername: 'user_discord',
     email: 'user@example.com',
     password: 'StrongPassword123',
     ...overrides,
@@ -54,6 +56,7 @@ export async function registerUser(
   return {
     id: res.body.data.user.id as string,
     username: res.body.data.user.username as string,
+    discordUsername: res.body.data.user.discordUsername as string,
     email: res.body.data.user.email as string,
     cookie: cookieOf(res),
   };
@@ -72,10 +75,6 @@ export interface CreateItemOverrides {
   title?: string;
   description?: string;
   category?: string;
-  locationLabel?: string;
-  locationCity?: string;
-  locationRegion?: string;
-  locationCountry?: string;
   dateFound?: string;
 }
 
@@ -90,9 +89,6 @@ export async function createItem(
     .field('title', overrides.title ?? 'Black wallet')
     .field('description', overrides.description ?? 'Black leather wallet found near the library entrance.')
     .field('category', overrides.category ?? 'ACCESSORIES')
-    .field('locationLabel', overrides.locationLabel ?? 'Near the central library')
-    .field('locationCity', overrides.locationCity ?? 'Algiers')
-    .field('locationCountry', overrides.locationCountry ?? 'Algeria')
     .field('dateFound', overrides.dateFound ?? '2026-10-30')
     .attach('images', pngBuffer(), 'photo.png');
 

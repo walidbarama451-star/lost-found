@@ -21,20 +21,12 @@ export interface ItemImage {
   publicId: string;
 }
 
-export interface ItemLocation {
-  label: string;
-  city?: string;
-  region?: string;
-  country?: string;
-}
-
 export interface ItemRecord {
   _id: Types.ObjectId;
   title: string;
   description: string;
   category: ItemCategory;
   images: ItemImage[];
-  location: ItemLocation;
   dateFound: Date;
   status: ItemStatus;
   createdBy: Types.ObjectId;
@@ -52,16 +44,6 @@ const imageSchema = new Schema<ItemImage>(
   { _id: false },
 );
 
-const locationSchema = new Schema<ItemLocation>(
-  {
-    label: { type: String, required: true, trim: true, maxlength: 120 },
-    city: { type: String, trim: true, maxlength: 80 },
-    region: { type: String, trim: true, maxlength: 80 },
-    country: { type: String, trim: true, maxlength: 80 },
-  },
-  { _id: false },
-);
-
 const itemSchema = new Schema<ItemRecord>(
   {
     title: { type: String, required: true, trim: true, minlength: 3, maxlength: 120 },
@@ -72,7 +54,6 @@ const itemSchema = new Schema<ItemRecord>(
       default: [],
       validate: [(v: unknown[]) => v.length > 0, 'At least one image is required'],
     },
-    location: { type: locationSchema, required: true },
     dateFound: { type: Date, required: true },
     status: { type: String, enum: ['ACTIVE', 'CLAIMED', 'RETURNED', 'CLOSED', 'HIDDEN'], default: 'ACTIVE' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },

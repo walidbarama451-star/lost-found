@@ -5,17 +5,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import { env } from './env.js';
 
 export interface StoredImage {
-  /** Delivery URL stored on the item document. */
   url: string;
-  /** Provider asset identifier, used for later deletion. */
   publicId: string;
 }
-
-/**
- * Stores an image with the configured provider:
- * - `cloudinary` when CLOUDINARY_* credentials are present,
- * - `local` disk fallback (served from /uploads) otherwise.
- */
 export async function storeImage(buffer: Buffer, mimeType: string): Promise<StoredImage> {
   if (env.imageStorage === 'cloudinary') {
     return uploadToCloudinary(buffer);
@@ -58,7 +50,6 @@ function uploadDirectory(): string {
   return path.resolve(process.cwd(), env.uploadDir);
 }
 
-/** Removes a previously stored image. Never trusts client-provided paths. */
 export async function deleteImage(publicId: string): Promise<void> {
   try {
     if (env.imageStorage === 'cloudinary') {
@@ -68,7 +59,6 @@ export async function deleteImage(publicId: string): Promise<void> {
     const filename = path.basename(publicId);
     await fs.unlink(path.join(uploadDirectory(), filename));
   } catch (error) {
-    // Best effort: log and continue, the DB record is already updated.
     console.error(
       `[images] failed to delete asset ${publicId}:`,
       error instanceof Error ? error.message : error,

@@ -85,7 +85,7 @@ Never accept `role`, password hash, or arbitrary account flags from profile upda
 | GET | `/items/mine` | Yes | Get own listings |
 
 Example query:
-`GET /items?q=black%20wallet&category=ACCESSORIES&city=Algiers&page=1&limit=12&sort=newest`
+`GET /items?q=black%20wallet&category=ACCESSORIES&page=1&limit=12&sort=newest`
 
 Example create body (if images are uploaded separately):
 ```json
@@ -93,11 +93,6 @@ Example create body (if images are uploaded separately):
   "title": "Black wallet",
   "description": "Black leather wallet found near the library.",
   "category": "ACCESSORIES",
-  "location": {
-    "label": "Near the central library",
-    "city": "Algiers",
-    "country": "Algeria"
-  },
   "dateFound": "2026-10-30"
 }
 ```

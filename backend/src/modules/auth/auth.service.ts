@@ -10,7 +10,6 @@ export interface AuthResult {
   token: string;
 }
 
-/** Creates a new account. Duplicate emails are rejected with 409. */
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   const email = input.email.trim().toLowerCase();
 
@@ -22,6 +21,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   const passwordHash = await bcrypt.hash(input.password, PASSWORD_HASH_COST);
   const user = await User.create({
     username: input.username.trim(),
+    discordUsername: input.discordUsername?.trim() || undefined,
     email,
     passwordHash,
   });
@@ -29,10 +29,6 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   return { user: toSafeUser(user), token: signAuthToken(user.id) };
 }
 
-/**
- * Verifies credentials. The error message is intentionally generic so the
- * response cannot be used to enumerate accounts.
- */
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
   const invalidCredentials = AppError.unauthorized('Invalid email or password');
 

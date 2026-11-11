@@ -14,22 +14,10 @@ const isNotInTheFuture = (value: string): boolean => {
 
 const dateFound = datePattern.refine(isNotInTheFuture, 'Date found cannot be in the future');
 
-/** Empty multipart/JSON values become `undefined`. */
-function optionalText(max: number) {
-  return z.preprocess(
-    (value) => (value === '' || value === null || value === undefined ? undefined : value),
-    z.string().trim().max(max, `Must be at most ${max} characters`).optional(),
-  );
-}
-
 export const createItemSchema = z.object({
   title: z.string().trim().min(3, 'Title must be at least 3 characters').max(120),
   description: z.string().trim().min(10, 'Description must be at least 10 characters').max(5000),
   category: z.enum(ITEM_CATEGORIES),
-  locationLabel: z.string().trim().min(1, 'Describe the approximate location').max(120),
-  locationCity: optionalText(80),
-  locationRegion: optionalText(80),
-  locationCountry: optionalText(80),
   dateFound,
 });
 
@@ -42,7 +30,6 @@ export const updateItemSchema = createItemSchema
 export const listItemsQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),
   category: z.enum(ITEM_CATEGORIES).optional(),
-  city: z.string().trim().max(80).optional(),
   fromDate: datePattern.optional(),
   toDate: datePattern.optional(),
   page: z.coerce.number().int().min(1, 'page must be a positive integer').default(1),

@@ -8,7 +8,7 @@ Help people report found belongings and help owners find and safely reclaim them
 
 A user can:
 - Register, sign in, and manage a profile.
-- Publish an item they found, including photos, description, category, date, and approximate location.
+- Publish an item they found, including photos, description, category, and date.
 - Browse and search found-item listings.
 - Submit a private claim explaining why an item belongs to them.
 - Communicate through a safe contact workflow.

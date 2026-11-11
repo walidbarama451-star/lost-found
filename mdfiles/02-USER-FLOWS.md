@@ -3,7 +3,7 @@
 ## Flow A: Registration and sign-in
 
 1. Guest opens the registration page.
-2. Enters username, email, and password.
+2. Enters username, Discord username, email, and password.
 3. Frontend performs basic validation.
 4. Backend validates again, checks email uniqueness, hashes password, and creates user.
 5. Backend returns safe user data and an authentication credential.
@@ -14,7 +14,7 @@ Sign-in follows the same pattern but verifies the password hash.
 ## Flow B: Publish a found item
 
 1. Signed-in user opens the create-listing page.
-2. Enters title, description, category, approximate location, and date found.
+2. Enters title, description, category, and date found.
 3. Selects one or more photos.
 4. Frontend checks file size/type for usability; backend performs authoritative validation.
 5. Backend uploads files to Cloudinary and stores their URLs and public IDs with the listing.

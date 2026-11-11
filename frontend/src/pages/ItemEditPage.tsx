@@ -25,10 +25,6 @@ function toFormValues(item: OwnerItem): ItemFormValues {
     title: item.title,
     description: item.description,
     category: item.category,
-    locationLabel: item.location.label,
-    locationCity: item.location.city ?? '',
-    locationRegion: item.location.region ?? '',
-    locationCountry: item.location.country ?? '',
     dateFound: item.dateFound.slice(0, 10),
   };
 }
@@ -39,10 +35,6 @@ function buildPatch(values: ItemFormValues) {
     title: values.title,
     description: values.description,
     category: values.category,
-    locationLabel: values.locationLabel,
-    locationCity: values.locationCity || undefined,
-    locationRegion: values.locationRegion || undefined,
-    locationCountry: values.locationCountry || undefined,
     dateFound: values.dateFound,
   };
 }

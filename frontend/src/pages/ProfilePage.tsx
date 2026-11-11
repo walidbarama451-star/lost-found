@@ -13,6 +13,7 @@ const EMPTY_VALUES: ProfileFormValues = {
   username: '',
   email: '',
   phone: '',
+  discordUsername: '',
   avatarUrl: '',
 };
 
@@ -34,6 +35,7 @@ export default function ProfilePage() {
       username: user.username,
       email: user.email,
       phone: user.phone ?? '',
+      discordUsername: user.discordUsername ?? '',
       avatarUrl: user.avatarUrl ?? '',
     });
   }
@@ -71,6 +73,9 @@ export default function ProfilePage() {
       if (check.data.username !== user.username) patch.username = check.data.username;
       if (check.data.email !== user.email) patch.email = check.data.email;
       if (check.data.phone !== (user.phone ?? '')) patch.phone = check.data.phone;
+      if (check.data.discordUsername !== (user.discordUsername ?? '')) {
+        patch.discordUsername = check.data.discordUsername;
+      }
       if (check.data.avatarUrl !== (user.avatarUrl ?? '')) patch.avatarUrl = check.data.avatarUrl;
 
       if (Object.keys(patch).length === 0) {
@@ -191,6 +196,27 @@ export default function ProfilePage() {
           </div>
 
           <div className="form-field">
+            <label className="form-label" htmlFor="profile-discord">
+              Discord username <span className="muted">(optional)</span>
+            </label>
+            <input
+              id="profile-discord"
+              className="form-control"
+              type="text"
+              value={values.discordUsername}
+              onChange={(event) => setField('discordUsername', event.target.value)}
+              aria-invalid={fieldErrors.discordUsername ? 'true' : undefined}
+              aria-describedby={fieldErrors.discordUsername ? 'profile-discord-error' : undefined}
+              placeholder="yourname"
+            />
+            {fieldErrors.discordUsername ? (
+              <span className="form-error" id="profile-discord-error">
+                {fieldErrors.discordUsername}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="form-field">
             <label className="form-label" htmlFor="profile-avatar">
               Avatar URL <span className="muted">(optional)</span>
             </label>
@@ -221,7 +247,7 @@ export default function ProfilePage() {
         <aside className="card profile-page__aside">
           <h2>Good to know</h2>
           <ul className="profile-page__tips">
-            <li>Your email and phone are only shared with you — claimants stay anonymous until you accept their claim.</li>
+            <li>Your email and phone are only shared with you. Your Discord username is visible to other signed-in users so they can reach you there.</li>
             <li>Keep proof details (serial numbers, unique markings) out of public listings.</li>
             <li>You can review every claim you’ve submitted from the Claims page.</li>
           </ul>

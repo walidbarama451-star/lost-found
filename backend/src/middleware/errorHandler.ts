@@ -1,4 +1,4 @@
-import type { ErrorRequestHandler } from 'express';
+  import type { ErrorRequestHandler } from 'express';
 import { MulterError } from 'multer';
 import { ZodError } from 'zod';
 import { env } from '../config/env.js';
@@ -9,10 +9,6 @@ interface MongoDuplicateKeyError {
   message?: string;
 }
 
-/**
- * Central error handler. Expected errors return safe messages; unexpected
- * errors are logged server-side and never leak stack traces in production.
- */
 export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   if (res.headersSent) {
     return;

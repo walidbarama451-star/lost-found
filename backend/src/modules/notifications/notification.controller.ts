@@ -9,7 +9,6 @@ function requireUser(req: Request): string {
   return req.user.id;
 }
 
-/** GET /api/notifications — own notifications, newest first. */
 export const getNotifications = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUser(req);
   const query = (req.validatedQuery ?? {}) as { page?: number; limit?: number };
@@ -17,14 +16,12 @@ export const getNotifications = asyncHandler(async (req: Request, res: Response)
   ok(res, result);
 });
 
-/** PATCH /api/notifications/:notificationId/read — mark one as read. */
 export const patchRead = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUser(req);
   const notification = await markNotificationRead(userId, req.params.notificationId as string);
   ok(res, { notification }, 'Marked as read');
 });
 
-/** PATCH /api/notifications/read-all — mark every own notification read. */
 export const patchReadAll = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUser(req);
   const modified = await markAllNotificationsRead(userId);

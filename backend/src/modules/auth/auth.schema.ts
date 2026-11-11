@@ -6,6 +6,13 @@ export const registerSchema = z.object({
     .trim()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username must be at most 30 characters'),
+  discordUsername: z
+    .string()
+    .trim()
+    .min(2, 'Discord username must be at least 2 characters')
+    .max(32, 'Discord username must be at most 32 characters')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
   email: z.string().trim().email('Enter a valid email address').max(254),
   password: z
     .string()

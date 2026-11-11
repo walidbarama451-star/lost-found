@@ -6,7 +6,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import StatusBadge from '../components/StatusBadge';
 import { resolveImageUrl } from '../lib/api';
-import { categoryLabel, formatDate, formatDateTime, formatLocation } from '../lib/format';
+import { categoryLabel, formatDate, formatDateTime } from '../lib/format';
 import { toDisplayError } from '../lib/validation';
 import { useAuth } from '../features/auth/AuthContext';
 import { useApi } from '../lib/useApi';
@@ -109,12 +109,16 @@ export default function ItemDetailPage() {
               <dd>{formatDate(item.dateFound)}</dd>
             </div>
             <div>
-              <dt>Approximate location</dt>
-              <dd>{formatLocation(item.location)}</dd>
-            </div>
-            <div>
               <dt>Posted by</dt>
-              <dd>{item.owner.username}</dd>
+              <dd>
+                {user ? (
+                  <Link to={`/users/${item.owner.id}`} title="View profile">
+                    {item.owner.username}
+                  </Link>
+                ) : (
+                  item.owner.username
+                )}
+              </dd>
             </div>
             <div>
               <dt>Published</dt>

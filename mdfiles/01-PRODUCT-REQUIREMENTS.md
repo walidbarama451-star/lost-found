@@ -39,7 +39,7 @@ Do not implement an administrator role until normal user permissions are working
 ## 4. Functional requirements
 
 ### Authentication
-- Register with username, email, and password.
+- Register with username, Discord username, email, and password.
 - Validate all input on the server.
 - Normalize email to lowercase.
 - Hash passwords; never store plaintext passwords.
@@ -58,7 +58,6 @@ A listing contains:
 - Description.
 - Category.
 - One or more images.
-- Approximate found location.
 - Date found.
 - Optional public contact preference, without exposing private contact details by default.
 - Status.
@@ -68,7 +67,7 @@ A user can create, edit, and delete only their own listings. The server must enf
 ### Browse and search
 - Paginated list of active listings.
 - Search by title and description.
-- Filter by category, location, and date range.
+- Filter by category and date range.
 - Sort by newest first by default.
 - Provide clear empty, loading, and error states.
 

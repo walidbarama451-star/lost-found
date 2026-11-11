@@ -6,7 +6,6 @@ export interface ClaimRecord {
   _id: Types.ObjectId;
   item: Types.ObjectId;
   claimant: Types.ObjectId;
-  /** Private proof-of-ownership explanation — never public. */
   message: string;
   status: ClaimStatus;
   decisionAt?: Date;
@@ -28,7 +27,6 @@ const claimSchema = new Schema<ClaimRecord>(
 claimSchema.index({ item: 1, claimant: 1, status: 1 });
 claimSchema.index({ claimant: 1, createdAt: -1 });
 claimSchema.index({ item: 1, createdAt: -1 });
-// At most one PENDING claim per claimant/item pair, enforced by the database.
 claimSchema.index({ item: 1, claimant: 1 }, { unique: true, partialFilterExpression: { status: 'PENDING' } });
 
 export type ClaimDoc = HydratedDocument<ClaimRecord>;

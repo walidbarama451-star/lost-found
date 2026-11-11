@@ -38,17 +38,20 @@ export type NotificationType =
 export interface User {
   id: string;
   username: string;
+  discordUsername?: string;
   email: string;
   phone?: string;
   avatarUrl?: string;
   createdAt: string;
 }
 
-export interface ItemLocation {
-  label: string;
-  city?: string;
-  region?: string;
-  country?: string;
+/** Another account's profile as shown on `/users/:id` (no email/phone). */
+export interface PublicUser {
+  id: string;
+  username: string;
+  discordUsername?: string;
+  avatarUrl?: string;
+  createdAt: string;
 }
 
 export interface PublicItem {
@@ -57,7 +60,6 @@ export interface PublicItem {
   description: string;
   category: Category;
   images: { url: string }[];
-  location: ItemLocation;
   dateFound: string;
   status: ItemStatus;
   createdAt: string;

@@ -17,7 +17,6 @@ interface ItemListResult {
 function buildFilter(options: {
   q?: string;
   category?: string;
-  city?: string;
   fromDate?: string;
   toDate?: string;
   status?: ItemStatus;
@@ -30,9 +29,6 @@ function buildFilter(options: {
     filter.$or = [{ title: pattern }, { description: pattern }];
   }
   if (options.category) filter.category = options.category;
-  if (options.city) {
-    filter['location.city'] = new RegExp(`^${escapeRegex(options.city)}$`, 'i');
-  }
   if (options.fromDate || options.toDate) {
     const range: Record<string, Date> = {};
     if (options.fromDate) range.$gte = new Date(options.fromDate);
@@ -43,13 +39,11 @@ function buildFilter(options: {
   return filter as FilterQuery<ItemRecord>;
 }
 
-/** Public browse/search: only ACTIVE listings, whitelisted filters only. */
 export async function listActiveItems(query: ListItemsQuery): Promise<ItemListResult> {
   const { page, limit } = parsePagination(query);
   const filter = buildFilter({
     q: query.q,
     category: query.category,
-    city: query.city,
     fromDate: query.fromDate,
     toDate: query.toDate,
     status: 'ACTIVE',
@@ -71,7 +65,6 @@ export async function listActiveItems(query: ListItemsQuery): Promise<ItemListRe
   };
 }
 
-/** The authenticated user's own listings across all statuses. */
 export async function listMyItems(userId: string, query: MyItemsQuery): Promise<ItemListResult> {
   const { page, limit } = parsePagination(query);
   const filter: FilterQuery<ItemRecord> = { createdBy: userId };
@@ -129,12 +122,6 @@ export async function createItem(
       title: input.title,
       description: input.description,
       category: input.category,
-      location: {
-        label: input.locationLabel,
-        city: input.locationCity,
-        region: input.locationRegion,
-        country: input.locationCountry,
-      },
       dateFound: new Date(`${input.dateFound}T12:00:00.000Z`),
       images: uploaded,
       createdBy: userId,
@@ -150,41 +137,22 @@ export async function createItem(
   }
 }
 
-function buildUpdateSet(patch: UpdateItemInput, current: ItemRecord): Record<string, unknown> {
+function buildUpdateSet(patch: UpdateItemInput): Record<string, unknown> {
   const set: Record<string, unknown> = {};
   if (patch.title !== undefined) set.title = patch.title;
   if (patch.description !== undefined) set.description = patch.description;
   if (patch.category !== undefined) set.category = patch.category;
   if (patch.dateFound !== undefined) set.dateFound = new Date(`${patch.dateFound}T12:00:00.000Z`);
-
-  const locationPatch =
-    patch.locationLabel !== undefined ||
-    patch.locationCity !== undefined ||
-    patch.locationRegion !== undefined ||
-    patch.locationCountry !== undefined;
-  if (locationPatch) {
-    // Merge so a partial location patch never drops the required label.
-    const location: Record<string, string> = { label: current.location.label };
-    if (current.location.city) location.city = current.location.city;
-    if (current.location.region) location.region = current.location.region;
-    if (current.location.country) location.country = current.location.country;
-    if (patch.locationLabel !== undefined) location.label = patch.locationLabel;
-    if (patch.locationCity !== undefined) location.city = patch.locationCity;
-    if (patch.locationRegion !== undefined) location.region = patch.locationRegion;
-    if (patch.locationCountry !== undefined) location.country = patch.locationCountry;
-    set.location = location;
-  }
   return set;
 }
 
-/** Owner-only update. `createdBy` and `status` are structurally excluded. */
 export async function updateItem(itemId: string, userId: string, patch: UpdateItemInput): Promise<ItemDto> {
   const existing = await Item.findById(itemId);
   if (!existing) throw AppError.notFound('Listing not found');
   if (existing.createdBy.toString() !== userId)
     throw AppError.forbidden('You can only manage your own listings');
 
-  const set = buildUpdateSet(patch, existing);
+  const set = buildUpdateSet(patch);
   if (Object.keys(set).length === 0) throw AppError.badRequest('Provide at least one field to update');
 
   const doc = await Item.findOneAndUpdate(
@@ -197,7 +165,6 @@ export async function updateItem(itemId: string, userId: string, patch: UpdateIt
   return toOwnerItem(asPopulated(doc));
 }
 
-/** Soft-close: listings with history become CLOSED instead of being erased. */
 export async function closeItem(itemId: string, userId: string): Promise<ItemDto> {
   const existing = await Item.findById(itemId);
   if (!existing) throw AppError.notFound('Listing not found');
@@ -212,7 +179,6 @@ export async function closeItem(itemId: string, userId: string): Promise<ItemDto
   return toOwnerItem(asPopulated(existing));
 }
 
-/** Owner marks a claimed item as handed back to its owner. */
 export async function markReturned(itemId: string, userId: string): Promise<ItemDto> {
   const doc = await Item.findOneAndUpdate(
     { _id: itemId, createdBy: userId, status: 'CLAIMED' },
@@ -289,7 +255,6 @@ export async function removeImage(itemId: string, userId: string, publicId: stri
   if (!image) throw AppError.notFound('Image not found on this listing');
   if (existing.images.length <= 1) throw AppError.conflict('A listing must keep at least one image');
 
-  // Database first, then the remote asset.
   const doc = await Item.findOneAndUpdate(
     { _id: itemId, createdBy: userId },
     { $pull: { images: { publicId } } },

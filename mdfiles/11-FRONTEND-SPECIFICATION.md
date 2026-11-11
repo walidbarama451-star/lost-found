@@ -96,7 +96,7 @@ Vite environment variables exposed to the browser must be treated as public. Nev
 Use a clean, trustworthy visual style:
 - Clear “Found items” browsing.
 - Strong, readable item photos.
-- Visible category and approximate location.
+- Visible category and date found.
 - Clear status labels.
 - Simple forms.
 - Privacy reminder near claim forms.

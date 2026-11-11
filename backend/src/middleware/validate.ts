@@ -4,13 +4,6 @@ import { AppError } from '../shared/errors/AppError.js';
 
 type Source = 'body' | 'params' | 'query';
 
-/**
- * Validates the chosen request part with a Zod schema and replaces it with
- * the parsed (and transformed) value.
- *
- * Note: Express 4 exposes `req.query` through a read-only getter, so parsed
- * query values are stored on `req.validatedQuery` instead.
- */
 export function validate(schema: ZodTypeAny, source: Source = 'body'): RequestHandler {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req[source]);

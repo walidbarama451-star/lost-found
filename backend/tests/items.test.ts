@@ -11,9 +11,6 @@ describe('item creation', () => {
       .field('title', 'Black wallet')
       .field('description', 'Black leather wallet found near the library entrance.')
       .field('category', 'ACCESSORIES')
-      .field('locationLabel', 'Near the central library')
-      .field('locationCity', 'Algiers')
-      .field('locationCountry', 'Algeria')
       .field('dateFound', '2026-10-30')
       .attach('images', pngBuffer(), 'wallet.png');
 
@@ -26,6 +23,7 @@ describe('item creation', () => {
     });
     expect(res.body.data.item.images).toHaveLength(1);
     expect(res.body.data.item.images[0].url).toBeTruthy();
+    expect(res.body.data.item).not.toHaveProperty('location');
   });
 
   it('rejects a listing without an image', async () => {
@@ -36,7 +34,6 @@ describe('item creation', () => {
       .field('title', 'No photo item')
       .field('description', 'This listing tries to be created without any attached images.')
       .field('category', 'KEYS')
-      .field('locationLabel', 'Bus stop')
       .field('dateFound', '2026-10-30');
 
     expect(res.status).toBe(400);
@@ -51,7 +48,6 @@ describe('item creation', () => {
       .field('title', 'Mystery item')
       .field('description', 'A listing with a category that is not part of the controlled list.')
       .field('category', 'WEAPONS')
-      .field('locationLabel', 'Park')
       .field('dateFound', '2026-10-30')
       .attach('images', pngBuffer(), 'x.png');
 
@@ -66,7 +62,6 @@ describe('item creation', () => {
       .field('title', 'Time traveler keys')
       .field('description', 'Keys that were supposedly found on a date far in the future.')
       .field('category', 'KEYS')
-      .field('locationLabel', 'Station')
       .field('dateFound', '2099-01-01')
       .attach('images', jpegBuffer(), 'keys.jpg');
 
@@ -250,7 +245,6 @@ describe('image uploads', () => {
       .field('title', 'Bad file item')
       .field('description', 'This listing attaches a file that is not an image at all.')
       .field('category', 'OTHER')
-      .field('locationLabel', 'Office')
       .field('dateFound', '2026-10-30')
       .attach('images', Buffer.from('%PDF-1.7 fake'), 'doc.pdf');
 
@@ -265,7 +259,6 @@ describe('image uploads', () => {
       .field('title', 'Spoofed image')
       .field('description', 'This file claims to be a PNG but contains arbitrary non-image bytes.')
       .field('category', 'OTHER')
-      .field('locationLabel', 'Office')
       .field('dateFound', '2026-10-30')
       .attach('images', Buffer.alloc(64, 65), { filename: 'fake.png', contentType: 'image/png' });
 
@@ -281,7 +274,6 @@ describe('image uploads', () => {
       .field('title', 'Huge photo item')
       .field('description', 'This listing tries to attach an image bigger than the allowed limit.')
       .field('category', 'OTHER')
-      .field('locationLabel', 'Office')
       .field('dateFound', '2026-10-30')
       .attach('images', oversized, 'huge.png');
 

@@ -4,7 +4,6 @@ import type { ClaimStatus } from './claim.model.js';
 export interface ClaimDto {
   id: string;
   status: ClaimStatus;
-  /** Private — only the claimant and the listing owner ever see this. */
   message: string;
   createdAt: string;
   decisionAt: string | null;
@@ -43,7 +42,6 @@ function baseDto(claim: PopulatedClaim): ClaimDto {
   };
 }
 
-/** Claim as seen by the claimant, with a link back to the listing. */
 export function toMyClaimDto(claim: PopulatedClaim): MyClaimDto {
   const itemRef = claim.item as {
     _id: Types.ObjectId;
@@ -63,7 +61,6 @@ export function toMyClaimDto(claim: PopulatedClaim): MyClaimDto {
   return { ...baseDto(claim), item };
 }
 
-/** Claim as seen by the listing owner, with the claimant's display name. */
 export function toClaimOnItemDto(claim: PopulatedClaim): ClaimOnItemDto {
   const claimantRef = claim.claimant as { _id: Types.ObjectId; username: string };
   const claimant =

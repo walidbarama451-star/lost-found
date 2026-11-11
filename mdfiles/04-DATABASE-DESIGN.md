@@ -7,6 +7,7 @@ Use MongoDB with Mongoose. Define schemas and indexes explicitly.
 Suggested fields:
 - `_id`: ObjectId.
 - `username`: string, required, trimmed, length-limited.
+- `discordUsername`: string, supplied during registration.
 - `email`: string, required, lowercase, unique index.
 - `passwordHash`: string, required, never returned by API.
 - `phone`: optional string; private.
@@ -24,7 +25,6 @@ Suggested fields:
 - `description`: string, required, length-limited.
 - `category`: enum/string from a maintained category list.
 - `images`: array of `{ url, publicId }`.
-- `location`: structured approximate location, e.g. `{ label, city, region, country }`; do not require a private home address.
 - `dateFound`: Date.
 - `status`: `ACTIVE | CLAIMED | RETURNED | CLOSED | HIDDEN`.
 - `createdBy`: ObjectId reference to User.

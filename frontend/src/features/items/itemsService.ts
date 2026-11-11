@@ -6,7 +6,6 @@ import type { ItemStatus, OwnerItem, Paginated, PublicItem } from '../../types';
 export interface ItemListQuery {
   q?: string;
   category?: string;
-  city?: string;
   fromDate?: string;
   toDate?: string;
   page?: number;
@@ -48,10 +47,6 @@ export interface ItemPatch {
   title?: string;
   description?: string;
   category?: string;
-  locationLabel?: string;
-  locationCity?: string;
-  locationRegion?: string;
-  locationCountry?: string;
   dateFound?: string;
 }
 

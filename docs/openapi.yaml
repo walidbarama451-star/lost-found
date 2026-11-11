@@ -72,6 +72,7 @@ components:
       properties:
         id: { type: string }
         username: { type: string, minLength: 3, maxLength: 30 }
+        discordUsername: { type: string, minLength: 2, maxLength: 32 }
         email: { type: string, format: email }
         phone: { type: string }
         avatarUrl: { type: string }
@@ -83,14 +84,6 @@ components:
         limit: { type: integer }
         total: { type: integer }
         totalPages: { type: integer }
-    ItemLocation:
-      type: object
-      required: [label]
-      properties:
-        label: { type: string }
-        city: { type: string }
-        region: { type: string }
-        country: { type: string }
     ItemImage:
       type: object
       properties:
@@ -110,7 +103,6 @@ components:
         images:
           type: array
           items: { $ref: '#/components/schemas/ItemImage' }
-        location: { $ref: '#/components/schemas/ItemLocation' }
         dateFound: { type: string, format: date-time }
         status: { type: string, enum: [ACTIVE, CLAIMED, RETURNED, CLOSED, HIDDEN] }
         createdAt: { type: string, format: date-time }
@@ -179,9 +171,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [username, email, password]
+              required: [username, discordUsername, email, password]
               properties:
                 username: { type: string, minLength: 3, maxLength: 30 }
+                discordUsername: { type: string, minLength: 2, maxLength: 32 }
                 email: { type: string, format: email }
                 password: { type: string, minLength: 8 }
       responses:
@@ -255,11 +248,33 @@ paths:
                 username: { type: string, minLength: 3, maxLength: 30 }
                 email: { type: string, format: email }
                 phone: { type: string }
+                discordUsername: { type: string, minLength: 2, maxLength: 32 }
                 avatarUrl: { type: string, format: uri }
       responses:
         '200': { description: Updated profile }
         '400': { $ref: '#/components/responses/BadRequest' }
         '409': { description: Email already in use }
+
+  /users/{userId}:
+    get:
+      tags: [users]
+      summary: View another account's public profile
+      security: [{ sessionCookie: [] }]
+      description: |
+        Returns only `username`, `discordUsername`, `avatarUrl` and `createdAt` so
+        signed-in users can contact each other on Discord. Email and phone are
+        never returned by this endpoint.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Public profile of the user
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { description: Not authenticated }
+        '404': { description: User not found }
 
   /items:
     get:
@@ -273,9 +288,6 @@ paths:
         - name: category
           in: query
           schema: { type: string, enum: [ELECTRONICS, DOCUMENTS, KEYS, BAGS, ACCESSORIES, CLOTHING, JEWELRY, PETS, OTHER] }
-        - name: city
-          in: query
-          schema: { type: string }
         - name: fromDate
           in: query
           schema: { type: string, format: date }
@@ -314,15 +326,11 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, description, category, locationLabel, dateFound, images]
+              required: [title, description, category, dateFound, images]
               properties:
                 title: { type: string, minLength: 3, maxLength: 120 }
                 description: { type: string, minLength: 10, maxLength: 5000 }
                 category: { type: string }
-                locationLabel: { type: string, maxLength: 120 }
-                locationCity: { type: string, maxLength: 80 }
-                locationRegion: { type: string, maxLength: 80 }
-                locationCountry: { type: string, maxLength: 80 }
                 dateFound: { type: string, format: date, description: 'YYYY-MM-DD, not in the future' }
                 images:
                   type: array

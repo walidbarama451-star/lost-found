@@ -6,13 +6,18 @@ describe('authentication', () => {
   it('registers a new account and returns a safe user object', async () => {
     const res = await request(app).post('/api/auth/register').send({
       username: 'sam',
+      discordUsername: 'sam_discord',
       email: 'Sam@Example.COM',
       password: 'StrongPassword123',
     });
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.user).toMatchObject({ username: 'sam', email: 'sam@example.com' });
+    expect(res.body.data.user).toMatchObject({
+      username: 'sam',
+      discordUsername: 'sam_discord',
+      email: 'sam@example.com',
+    });
     expect(res.body.data.user).not.toHaveProperty('passwordHash');
     expect(res.body.data.user).not.toHaveProperty('password');
     expect(res.body.data.user).not.toHaveProperty('role');
@@ -30,7 +35,12 @@ describe('authentication', () => {
     await registerUser({ email: 'dup@example.com' });
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ username: 'other', email: 'dup@example.com', password: 'StrongPassword123' });
+      .send({
+        username: 'other',
+        discordUsername: 'other_discord',
+        email: 'dup@example.com',
+        password: 'StrongPassword123',
+      });
 
     expect(res.status).toBe(409);
     expect(res.body.success).toBe(false);
@@ -39,10 +49,10 @@ describe('authentication', () => {
   it('rejects invalid registration input with field errors', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ username: 'ab', email: 'not-an-email', password: 'short' });
+      .send({ username: 'ab', discordUsername: 'x', email: 'not-an-email', password: 'short' });
 
     expect(res.status).toBe(400);
-    expect(res.body.errors.length).toBeGreaterThanOrEqual(3);
+    expect(res.body.errors.length).toBeGreaterThanOrEqual(4);
   });
 
   it('signs in with valid credentials and returns the same safe shape', async () => {

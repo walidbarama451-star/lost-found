@@ -93,7 +93,6 @@ describe('security and privacy', () => {
       .field('title', 'Owned by someone else?')
       .field('description', 'The client tries to set createdBy and status to values it does not own.')
       .field('category', 'OTHER')
-      .field('locationLabel', 'Somewhere')
       .field('dateFound', '2026-10-30')
       .field('createdBy', stranger.id)
       .field('status', 'HIDDEN')

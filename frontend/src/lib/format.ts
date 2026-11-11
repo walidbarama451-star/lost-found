@@ -77,20 +77,3 @@ export function formatDateTime(iso: string | null | undefined): string {
     minute: '2-digit',
   }).format(date);
 }
-
-export interface DisplayLocation {
-  label?: string;
-  city?: string;
-  region?: string;
-  country?: string;
-}
-
-/** "Central library · Algiers, Algeria" — approximate location only. */
-export function formatLocation(location: DisplayLocation): string {
-  const place = [location.city, location.region, location.country]
-    .filter((part): part is string => Boolean(part))
-    .filter((part, index, all) => all.indexOf(part) === index)
-    .join(', ');
-  if (location.label && place) return `${location.label} · ${place}`;
-  return location.label || place || 'Location not specified';
-}

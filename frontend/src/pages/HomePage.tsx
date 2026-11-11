@@ -13,7 +13,6 @@ import './HomePage.css';
 
 const EMPTY_FILTERS: ItemFilterValues = {
   category: '',
-  city: '',
   fromDate: '',
   toDate: '',
   sort: 'newest',
@@ -23,7 +22,6 @@ function readFilters(params: URLSearchParams): ItemFilterValues {
   const sort = params.get('sort');
   return {
     category: params.get('category') ?? '',
-    city: params.get('city') ?? '',
     fromDate: params.get('fromDate') ?? '',
     toDate: params.get('toDate') ?? '',
     sort: sort === 'oldest' ? 'oldest' : 'newest',
@@ -48,7 +46,6 @@ export default function HomePage() {
       listItems({
         q: query,
         category: draft.category,
-        city: draft.city,
         fromDate: draft.fromDate,
         toDate: draft.toDate,
         sort: draft.sort,
@@ -58,7 +55,6 @@ export default function HomePage() {
     [
       query,
       draft.category,
-      draft.city,
       draft.fromDate,
       draft.toDate,
       draft.sort,
@@ -103,7 +99,6 @@ export default function HomePage() {
         onApply={() =>
           updateParams({
             category: draft.category,
-            city: draft.city,
             fromDate: draft.fromDate,
             toDate: draft.toDate,
             sort: draft.sort === 'newest' ? '' : draft.sort,
