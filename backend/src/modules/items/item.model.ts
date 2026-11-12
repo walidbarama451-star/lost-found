@@ -19,6 +19,8 @@ export type ItemStatus = 'ACTIVE' | 'CLAIMED' | 'RETURNED' | 'CLOSED' | 'HIDDEN'
 export interface ItemImage {
   url: string;
   publicId: string;
+  /** CLIP-style vector; absent when the embedding service was unavailable. */
+  embedding?: number[];
 }
 
 export interface ItemRecord {
@@ -40,6 +42,7 @@ const imageSchema = new Schema<ItemImage>(
   {
     url: { type: String, required: true, maxlength: 1000 },
     publicId: { type: String, required: true, maxlength: 500 },
+    embedding: { type: [Number], default: undefined, select: false },
   },
   { _id: false },
 );

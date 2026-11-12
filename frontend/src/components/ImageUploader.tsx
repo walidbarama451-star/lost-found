@@ -3,13 +3,14 @@ import './ImageUploader.css';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB, matches backend
-const MAX_IMAGES = 5;
 
 interface ImageUploaderProps {
   files: File[];
   onFilesChange: (files: File[]) => void;
   /** Number of images already on the listing (edit mode). */
   existingCount?: number;
+  /** Maximum number of images (lost-item searches allow 3). */
+  maxImages?: number;
   disabled?: boolean;
   error?: string | null;
 }
@@ -27,6 +28,7 @@ export default function ImageUploader({
   files,
   onFilesChange,
   existingCount = 0,
+  maxImages = 5,
   disabled = false,
   error,
 }: ImageUploaderProps) {
@@ -43,7 +45,7 @@ export default function ImageUploader({
     };
   }, [files]);
 
-  const remaining = MAX_IMAGES - existingCount - files.length;
+  const remaining = maxImages - existingCount - files.length;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(event.target.files ?? []);
@@ -63,7 +65,7 @@ export default function ImageUploader({
     }
 
     if (accepted.length > remaining) {
-      rejected.push(`A listing can have at most ${MAX_IMAGES} images`);
+      rejected.push(`You can attach at most ${maxImages} images`);
       accepted.length = Math.max(0, remaining);
     }
 
@@ -81,10 +83,10 @@ export default function ImageUploader({
     <div className="image-uploader">
       <div className="image-uploader__head">
         <span className="form-label" id="image-uploader-label">
-          Photos <span className="muted">(1 required, up to {MAX_IMAGES})</span>
+          Photos <span className="muted">(1 required, up to {maxImages})</span>
         </span>
         <span className="muted image-uploader__count">
-          {existingCount + files.length}/{MAX_IMAGES}
+          {existingCount + files.length}/{maxImages}
         </span>
       </div>
 

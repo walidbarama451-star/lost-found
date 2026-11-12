@@ -21,7 +21,7 @@ describe('security and privacy', () => {
     }
   });
 
-  it('keeps claim messages out of every public response', async () => {
+  it('keeps claim messages out of every item response', async () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const { id } = await createItem(owner);
@@ -30,7 +30,7 @@ describe('security and privacy', () => {
     const endpoints = [
       request(app).get('/api/items'),
       request(app).get(`/api/items/${id}`),
-      request(app).get('/api/items?q=proof'),
+      request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie),
     ];
     for (const res of await Promise.all(endpoints)) {
       expect(JSON.stringify(res.body)).not.toContain('PROOF-TOKEN-77');

@@ -7,6 +7,7 @@ import './Navbar.css';
 
 const NAV_LINKS = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/lost-reports', label: 'My lost reports' },
   { to: '/my-items', label: 'My listings' },
   { to: '/claims', label: 'My claims' },
 ];
@@ -66,7 +67,7 @@ export default function Navbar() {
           aria-label="Main"
         >
           <NavLink className="navbar__link" to="/" end>
-            Browse
+            Find my item
           </NavLink>
 
           {user ? (

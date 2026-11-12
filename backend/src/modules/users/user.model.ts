@@ -8,7 +8,6 @@ export interface UserRecord {
   /** Never returned by any API response. */
   passwordHash: string;
   phone?: string;
-  avatarUrl?: string;
   role: 'USER' | 'ADMIN';
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +20,6 @@ const userSchema = new Schema<UserRecord>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
     passwordHash: { type: String, required: true, select: false },
     phone: { type: String, trim: true, maxlength: 30 },
-    avatarUrl: { type: String, trim: true, maxlength: 500 },
     role: { type: String, enum: ['USER', 'ADMIN'], default: 'USER' },
   },
   { timestamps: true },
@@ -36,7 +34,6 @@ export interface SafeUser {
   discordUsername?: string;
   email: string;
   phone?: string;
-  avatarUrl?: string;
   createdAt: Date;
 }
 
@@ -50,7 +47,6 @@ export function toSafeUser(user: UserDoc): SafeUser {
   };
   if (user.discordUsername) safe.discordUsername = user.discordUsername;
   if (user.phone) safe.phone = user.phone;
-  if (user.avatarUrl) safe.avatarUrl = user.avatarUrl;
   return safe;
 }
 
@@ -59,7 +55,6 @@ export interface PublicUser {
   id: string;
   username: string;
   discordUsername?: string;
-  avatarUrl?: string;
   createdAt: Date;
 }
 
@@ -71,7 +66,6 @@ export function toPublicUser(user: UserDoc): PublicUser {
     createdAt: user.createdAt,
   };
   if (user.discordUsername) pub.discordUsername = user.discordUsername;
-  if (user.avatarUrl) pub.avatarUrl = user.avatarUrl;
   return pub;
 }
 

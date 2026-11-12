@@ -36,7 +36,7 @@ export async function emailExists(email: string): Promise<boolean> {
  */
 export async function getPublicProfile(userId: string): Promise<PublicUser> {
   const oid = parseObjectId(userId, 'userId');
-  const user = await User.findById(oid).select('_id username discordUsername avatarUrl createdAt');
+  const user = await User.findById(oid).select('_id username discordUsername createdAt');
   if (!user) throw AppError.notFound('User not found');
   return toPublicUser(user);
 }
@@ -50,7 +50,6 @@ export async function updateProfile(userId: string, patch: UpdateProfileInput): 
   if (patch.username !== undefined) updates.username = patch.username.trim();
   if (patch.email !== undefined) updates.email = patch.email.trim().toLowerCase();
   if (patch.phone !== undefined) updates.phone = patch.phone;
-  if (patch.avatarUrl !== undefined) updates.avatarUrl = patch.avatarUrl;
 
   // Empty Discord username clears the field ($unset) — it is optional.
   const clearDiscord = patch.discordUsername === '';

@@ -74,98 +74,59 @@ describe('item creation', () => {
   });
 });
 
-describe('browsing and search', () => {
-  it('returns only ACTIVE listings with public fields only', async () => {
+describe('visibility and access control', () => {
+  it('hides all listings from the public browse endpoint', async () => {
+    const owner = await registerUser({ email: 'owner@example.com' });
+    await createItem(owner);
+
+    // The route is gone entirely — nothing is browsable by anyone.
+    const listed = await request(app).get('/api/items');
+    expect(listed.status).toBe(404);
+    expect(listed.body.data).toBeUndefined();
+  });
+
+  it('serves the detail page to the owner with owner-scoped fields only', async () => {
     const owner = await registerUser({ email: 'owner@example.com' });
     const { id } = await createItem(owner);
 
-    const listed = await request(app).get('/api/items');
-    expect(listed.status).toBe(200);
-    expect(listed.body.data.items).toHaveLength(1);
-    expect(listed.body.data.pagination).toMatchObject({ page: 1, limit: 12, total: 1, totalPages: 1 });
-
-    const item = listed.body.data.items[0];
-    expect(item.id).toBe(id);
-    expect(item.owner).toEqual({ id: owner.id, username: owner.username });
-    // Public payload must not leak owner contact details or image publicIds.
-    const raw = JSON.stringify(listed.body);
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
+    expect(detail.status).toBe(200);
+    expect(detail.body.data.item.id).toBe(id);
+    // Owner payload must not leak contact details or password hashes.
+    const raw = JSON.stringify(detail.body);
     expect(raw).not.toContain('owner@example.com');
-    expect(raw).not.toContain('publicId');
     expect(raw).not.toContain('passwordHash');
   });
 
-  it('hides closed listings from public results but shows them to their owner', async () => {
+  it('hides listings from other signed-in users who never matched them', async () => {
+    const owner = await registerUser({ email: 'owner@example.com' });
+    const stranger = await registerUser({ email: 'stranger@example.com' });
+    const { id } = await createItem(owner);
+
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', stranger.cookie);
+    expect(detail.status).toBe(404);
+    expect(detail.body.message).toBe('Listing not found');
+  });
+
+  it('hides closed listings from everyone except their owner', async () => {
     const owner = await registerUser();
     const { id } = await createItem(owner);
 
     await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
-
-    const publicList = await request(app).get('/api/items');
-    expect(publicList.body.data.items).toHaveLength(0);
 
     const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
     expect(mine.body.data.items).toHaveLength(1);
     expect(mine.body.data.items[0].status).toBe('CLOSED');
   });
 
-  it('searches by keyword and filters by category', async () => {
-    const user = await registerUser();
-    await createItem(user, { title: 'Blue backpack', category: 'BAGS' });
-    await createItem(user, { title: 'Silver keys', category: 'KEYS' });
-
-    const search = await request(app).get('/api/items?q=backpack');
-    expect(search.body.data.items).toHaveLength(1);
-    expect(search.body.data.items[0].title).toBe('Blue backpack');
-
-    const filtered = await request(app).get('/api/items?category=KEYS');
-    expect(filtered.body.data.items).toHaveLength(1);
-    expect(filtered.body.data.items[0].category).toBe('KEYS');
-
-    const miss = await request(app).get('/api/items?q=nothing-matches-this');
-    expect(miss.status).toBe(200);
-    expect(miss.body.data.items).toHaveLength(0);
-    expect(miss.body.data.pagination.total).toBe(0);
-  });
-
-  it('treats regex characters in the search string as literals', async () => {
-    const user = await registerUser();
-    await createItem(user, { title: 'Ordinary phone' });
-
-    const res = await request(app).get('/api/items?q=.*');
-    expect(res.status).toBe(200);
-    expect(res.body.data.items).toHaveLength(0);
-  });
-
-  it('clamps the page size to the documented maximum', async () => {
-    const res = await request(app).get('/api/items?limit=999');
-    expect(res.status).toBe(200);
-    expect(res.body.data.pagination.limit).toBe(50);
-  });
-
-  it('rejects non-numeric pagination', async () => {
-    const res = await request(app).get('/api/items?page=abc');
-    expect(res.status).toBe(400);
-  });
-
-  it('paginates results', async () => {
-    const user = await registerUser();
-    for (let index = 0; index < 3; index += 1) {
-      await createItem(user, { title: `Item number ${index}` });
-    }
-
-    const firstPage = await request(app).get('/api/items?page=1&limit=2');
-    expect(firstPage.body.data.items).toHaveLength(2);
-    expect(firstPage.body.data.pagination).toMatchObject({ total: 3, totalPages: 2 });
-
-    const secondPage = await request(app).get('/api/items?page=2&limit=2');
-    expect(secondPage.body.data.items).toHaveLength(1);
-  });
-
   it('returns a 404 for a missing listing and 400 for a malformed id', async () => {
-    const missing = await request(app).get('/api/items/000000000000000000000000');
+    const owner = await registerUser();
+    const missing = await request(app)
+      .get('/api/items/000000000000000000000000')
+      .set('Cookie', owner.cookie);
     expect(missing.status).toBe(404);
 
-    const malformed = await request(app).get('/api/items/not-an-id');
+    const malformed = await request(app).get('/api/items/not-an-id').set('Cookie', owner.cookie);
     expect(malformed.status).toBe(400);
   });
 });
@@ -199,7 +160,7 @@ describe('editing and closing listings', () => {
 
     expect(res.status).toBe(403);
 
-    const detail = await request(app).get(`/api/items/${id}`);
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
     expect(detail.body.data.item.title).toBe('Black wallet');
   });
 
@@ -211,7 +172,7 @@ describe('editing and closing listings', () => {
     const res = await request(app).delete(`/api/items/${id}`).set('Cookie', other.cookie);
     expect(res.status).toBe(403);
 
-    const detail = await request(app).get(`/api/items/${id}`);
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
     expect(detail.body.data.item.status).toBe('ACTIVE');
   });
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { escapeRegex } from '../src/shared/utils/escapeRegex.js';
 import { buildPaginationMeta, MAX_LIMIT, parsePagination } from '../src/shared/utils/pagination.js';
 import { sniffImageType } from '../src/middleware/upload.js';
+import { cosineSimilarity, textOverlap, textSimilarity } from '../src/shared/utils/similarity.js';
 
 describe('parsePagination', () => {
   it('applies defaults', () => {
@@ -34,6 +35,53 @@ describe('escapeRegex', () => {
     expect(new RegExp(escapeRegex('.*')).test('anything')).toBe(false);
     expect(new RegExp(escapeRegex('.*')).test('.*')).toBe(true);
     expect(new RegExp(escapeRegex('(x)')).test('(x)')).toBe(true);
+  });
+});
+
+describe('cosineSimilarity', () => {
+  it('returns 1 for identical vectors and 0 for orthogonal ones', () => {
+    expect(cosineSimilarity([1, 0, 0], [1, 0, 0])).toBeCloseTo(1);
+    expect(cosineSimilarity([1, 0], [0, 1])).toBeCloseTo(0);
+  });
+
+  it('is scale invariant and handles degenerate input', () => {
+    expect(cosineSimilarity([2, 2], [5, 5])).toBeCloseTo(1);
+    expect(cosineSimilarity([], [])).toBe(0);
+    expect(cosineSimilarity([1, 2], [1, 2, 3])).toBe(0);
+    expect(cosineSimilarity([0, 0], [1, 1])).toBe(0);
+  });
+});
+
+describe('textOverlap', () => {
+  it('scores identical wording as 1 and ignores stopwords', () => {
+    const text = 'Black leather wallet found near the library entrance';
+    expect(textOverlap(text, text)).toBe(1);
+  });
+
+  it('scores disjoint wording as 0', () => {
+    expect(textOverlap('silver keys ring', 'blue backpack strap')).toBe(0);
+    expect(textOverlap('', 'anything here')).toBe(0);
+  });
+});
+
+describe('textSimilarity', () => {
+  it('scores identical wording as 1', () => {
+    const text = 'Black leather wallet found near the library entrance';
+    expect(textSimilarity(text, text)).toBe(1);
+  });
+
+  it('rewards partial wording overlap between paraphrases', () => {
+    const score = textSimilarity(
+      'Lost a black wallet with a card holder near the library',
+      'Black wallet found in the library cafe',
+    );
+    expect(score).toBeGreaterThan(0.4);
+    expect(score).toBeLessThan(1);
+  });
+
+  it('scores disjoint wording as 0 and stems simple plurals', () => {
+    expect(textSimilarity('silver keys ring', 'blue backpack strap')).toBe(0);
+    expect(textSimilarity('silver keys on a ring', 'silver key ring')).toBeGreaterThan(0);
   });
 });
 

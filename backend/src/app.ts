@@ -13,6 +13,7 @@ import { requireSameOrigin } from './middleware/csrf.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { claimsRouter } from './modules/claims/claim.routes.js';
 import { itemsRouter } from './modules/items/item.routes.js';
+import { lostReportsRouter } from './modules/lostReports/lostReport.routes.js';
 import { notificationsRouter } from './modules/notifications/notification.routes.js';
 import { usersRouter } from './modules/users/user.routes.js';
 
@@ -82,6 +83,7 @@ export function createApp(): Express {
   app.use('/api/auth', authRouter);
   app.use('/api/users', usersRouter);
   app.use('/api/items', itemsRouter);
+  app.use('/api/lost-reports', lostReportsRouter);
   app.use('/api/claims', claimsRouter);
   app.use('/api/notifications', notificationsRouter);
 

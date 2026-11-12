@@ -14,7 +14,6 @@ const EMPTY_VALUES: ProfileFormValues = {
   email: '',
   phone: '',
   discordUsername: '',
-  avatarUrl: '',
 };
 
 export default function ProfilePage() {
@@ -36,7 +35,6 @@ export default function ProfilePage() {
       email: user.email,
       phone: user.phone ?? '',
       discordUsername: user.discordUsername ?? '',
-      avatarUrl: user.avatarUrl ?? '',
     });
   }
 
@@ -76,7 +74,6 @@ export default function ProfilePage() {
       if (check.data.discordUsername !== (user.discordUsername ?? '')) {
         patch.discordUsername = check.data.discordUsername;
       }
-      if (check.data.avatarUrl !== (user.avatarUrl ?? '')) patch.avatarUrl = check.data.avatarUrl;
 
       if (Object.keys(patch).length === 0) {
         setSuccess('No changes to save.');
@@ -212,27 +209,6 @@ export default function ProfilePage() {
             {fieldErrors.discordUsername ? (
               <span className="form-error" id="profile-discord-error">
                 {fieldErrors.discordUsername}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="form-field">
-            <label className="form-label" htmlFor="profile-avatar">
-              Avatar URL <span className="muted">(optional)</span>
-            </label>
-            <input
-              id="profile-avatar"
-              className="form-control"
-              type="url"
-              value={values.avatarUrl}
-              onChange={(event) => setField('avatarUrl', event.target.value)}
-              aria-invalid={fieldErrors.avatarUrl ? 'true' : undefined}
-              aria-describedby={fieldErrors.avatarUrl ? 'profile-avatar-error' : undefined}
-              placeholder="https://example.com/avatar.jpg"
-            />
-            {fieldErrors.avatarUrl ? (
-              <span className="form-error" id="profile-avatar-error">
-                {fieldErrors.avatarUrl}
               </span>
             ) : null}
           </div>

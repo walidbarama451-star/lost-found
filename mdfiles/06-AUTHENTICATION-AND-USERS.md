@@ -47,7 +47,6 @@ Safe profile fields:
 - id
 - username
 - email
-- optional public avatar URL
 - createdAt
 
 Do not return:

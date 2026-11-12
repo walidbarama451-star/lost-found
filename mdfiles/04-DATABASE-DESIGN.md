@@ -11,7 +11,6 @@ Suggested fields:
 - `email`: string, required, lowercase, unique index.
 - `passwordHash`: string, required, never returned by API.
 - `phone`: optional string; private.
-- `avatarUrl`: optional string.
 - `role`: `USER` by default; never user-editable.
 - `createdAt`, `updatedAt`: timestamps.
 

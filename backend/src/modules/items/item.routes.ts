@@ -8,7 +8,6 @@ import {
   deleteImageRoute,
   deleteItem,
   getItem,
-  listItems,
   listMine,
   patchItem,
   patchReturn,
@@ -17,18 +16,17 @@ import {
 } from './item.controller.js';
 import {
   createItemSchema,
-  listItemsQuerySchema,
   myItemsQuerySchema,
   updateItemSchema,
 } from './item.schema.js';
 
 export const itemsRouter = Router();
 
-itemsRouter.get('/', validate(listItemsQuerySchema, 'query'), listItems);
-
+// Found items are hidden by default: there is no public browse list. Detail
+// access is granted to the owner and to users whose lost report matched it.
 itemsRouter.get('/mine', authenticate, validate(myItemsQuerySchema, 'query'), listMine);
 itemsRouter.get('/:itemId/claims', authenticate, getItemClaims);
-itemsRouter.get('/:itemId', getItem);
+itemsRouter.get('/:itemId', authenticate, getItem);
 
 itemsRouter.post(
   '/',

@@ -11,6 +11,7 @@ import ItemEditPage from './pages/ItemEditPage';
 import LoginPage from './pages/LoginPage';
 import MyClaimsPage from './pages/MyClaimsPage';
 import MyItemsPage from './pages/MyItemsPage';
+import MyLostReportsPage from './pages/MyLostReportsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
@@ -18,18 +19,19 @@ import RegisterPage from './pages/RegisterPage';
 import UserProfilePage from './pages/UserProfilePage';
 
 /**
- * Application routes (spec 11). Public: `/`, `/items/:itemId`, `/register`,
- * `/login`. Everything else is wrapped in `ProtectedRoute`. The router itself
- * lives in `main.tsx` so tests can supply a MemoryRouter.
+ * Application routes. The home page is the lost-item photo search — found
+ * items are never browsable. `/` stays open for the sign-in prompt; the
+ * search form itself requires a session. Everything else is wrapped in
+ * `ProtectedRoute`. The router itself lives in `main.tsx` so tests can
+ * supply a MemoryRouter.
  */
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<AppLayout />}>
-          {/* Public */}
+          {/* Home = lost-item search (search form itself needs a session) */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/items/:itemId" element={<ItemDetailPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
 
@@ -39,6 +41,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lost-reports"
+            element={
+              <ProtectedRoute>
+                <MyLostReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/items/:itemId"
+            element={
+              <ProtectedRoute>
+                <ItemDetailPage />
               </ProtectedRoute>
             }
           />

@@ -17,13 +17,6 @@ export const updateProfileSchema = z
       .max(32, 'Discord username must be at most 32 characters')
       .optional()
       .or(z.literal('')),
-    avatarUrl: z
-      .string()
-      .trim()
-      .max(500)
-      .url('Avatar must be a valid URL')
-      .optional()
-      .or(z.literal('').transform(() => undefined)),
   })
   .refine((data) => Object.values(data).some((value) => value !== undefined), {
     message: 'Provide at least one field to update',

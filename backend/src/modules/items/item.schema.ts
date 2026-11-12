@@ -27,16 +27,6 @@ export const updateItemSchema = createItemSchema
     message: 'Provide at least one field to update',
   });
 
-export const listItemsQuerySchema = z.object({
-  q: z.string().trim().max(200).optional(),
-  category: z.enum(ITEM_CATEGORIES).optional(),
-  fromDate: datePattern.optional(),
-  toDate: datePattern.optional(),
-  page: z.coerce.number().int().min(1, 'page must be a positive integer').default(1),
-  limit: z.coerce.number().int().min(1, 'limit must be a positive integer').default(12),
-  sort: z.enum(['newest', 'oldest']).default('newest'),
-});
-
 export const myItemsQuerySchema = z.object({
   status: z.enum(['ACTIVE', 'CLAIMED', 'RETURNED', 'CLOSED', 'HIDDEN']).optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -46,5 +36,4 @@ export const myItemsQuerySchema = z.object({
 
 export type CreateItemInput = z.infer<typeof createItemSchema>;
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;
-export type ListItemsQuery = z.infer<typeof listItemsQuerySchema>;
 export type MyItemsQuery = z.infer<typeof myItemsQuerySchema>;

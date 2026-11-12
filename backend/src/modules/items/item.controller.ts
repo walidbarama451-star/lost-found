@@ -2,13 +2,12 @@ import type { Request, Response } from 'express';
 import { AppError } from '../../shared/errors/AppError.js';
 import { asyncHandler } from '../../shared/utils/asyncHandler.js';
 import { ok } from '../../shared/utils/response.js';
-import type { CreateItemInput, ListItemsQuery, MyItemsQuery, UpdateItemInput } from './item.schema.js';
+import type { CreateItemInput, MyItemsQuery, UpdateItemInput } from './item.schema.js';
 import {
   addImages,
   closeItem,
   createItem,
-  getPublicItem,
-  listActiveItems,
+  getVisibleItem,
   listMyItems,
   markReturned,
   removeImage,
@@ -24,12 +23,6 @@ function requireUser(req: Request): string {
   return req.user.id;
 }
 
-export const listItems = asyncHandler(async (req: Request, res: Response) => {
-  const query = (req.validatedQuery ?? {}) as ListItemsQuery;
-  const result = await listActiveItems(query);
-  ok(res, result);
-});
-
 export const listMine = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUser(req);
   const query = (req.validatedQuery ?? {}) as MyItemsQuery;
@@ -38,7 +31,8 @@ export const listMine = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getItem = asyncHandler(async (req: Request, res: Response) => {
-  const item = await getPublicItem(req.params.itemId as string);
+  const userId = requireUser(req);
+  const item = await getVisibleItem(req.params.itemId as string, userId);
   ok(res, { item });
 });
 

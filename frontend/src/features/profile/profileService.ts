@@ -8,7 +8,6 @@ export interface ProfilePatch {
   email?: string;
   phone?: string;
   discordUsername?: string;
-  avatarUrl?: string;
 }
 
 export async function updateProfile(patch: ProfilePatch): Promise<User> {

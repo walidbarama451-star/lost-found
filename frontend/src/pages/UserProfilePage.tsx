@@ -4,7 +4,6 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import { useAuth } from '../features/auth/AuthContext';
 import { getUserById } from '../features/profile/profileService';
-import { resolveImageUrl } from '../lib/api';
 import { formatDate } from '../lib/format';
 import { useApi } from '../lib/useApi';
 import './UserProfilePage.css';
@@ -20,7 +19,6 @@ export default function UserProfilePage() {
   if (error || !profile) return <ErrorState message={error ?? 'User not found.'} onRetry={reload} />;
 
   const isSelf = user?.id === profile.id;
-  const avatar = resolveImageUrl(profile.avatarUrl ?? null);
 
   const handleCopy = async () => {
     if (!profile.discordUsername) return;
@@ -41,13 +39,9 @@ export default function UserProfilePage() {
 
       <div className="card user-profile__card">
         <div className="user-profile__header">
-          {avatar ? (
-            <img className="user-profile__avatar" src={avatar} alt="" />
-          ) : (
-            <span className="user-profile__avatar user-profile__avatar--fallback" aria-hidden="true">
-              {profile.username.charAt(0).toUpperCase()}
-            </span>
-          )}
+          <span className="user-profile__avatar user-profile__avatar--fallback" aria-hidden="true">
+            {profile.username.charAt(0).toUpperCase()}
+          </span>
           <div>
             <h1>{profile.username}</h1>
             <p className="muted">Member since {formatDate(profile.createdAt)}</p>

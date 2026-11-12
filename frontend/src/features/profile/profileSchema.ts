@@ -19,11 +19,6 @@ export const profileSchema = z
         (value) => value === '' || value.length >= 2,
         'Discord username must be at least 2 characters',
       ),
-    avatarUrl: z
-      .string()
-      .trim()
-      .max(500)
-      .refine((value) => value === '' || /^https?:\/\/\S+$/.test(value), 'Avatar must be a valid URL'),
   })
   .refine((data) => Object.values(data).some((value) => value !== ''), {
     message: 'Provide at least one field to update',

@@ -1,0 +1,78 @@
+/* My lost reports page. */
+
+.lost-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.lost-reports__card {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lost-reports__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.lost-reports__summary h2 {
+  margin: 0 0 0.25rem;
+}
+
+.lost-reports__summary p {
+  margin: 0;
+}
+
+.lost-reports__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lost-reports__photos {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lost-reports__photo {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.lost-reports__last-search {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.lost-reports__matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.lost-reports__score {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.lost-reports__score--photo {
+  background: rgba(47, 133, 90, 0.12);
+  color: #276749;
+}
+
+.lost-reports__score--text {
+  background: rgba(49, 100, 179, 0.12);
+  color: #2a4d7f;
+}

@@ -2,8 +2,8 @@ import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { app, createItem, registerUser, submitClaim, type TestUser } from './helpers.js';
 
-async function listItem(itemId: string) {
-  const res = await request(app).get(`/api/items/${itemId}`);
+async function listItem(itemId: string, owner: TestUser) {
+  const res = await request(app).get(`/api/items/${itemId}`).set('Cookie', owner.cookie);
   return res.body.data.item as { status: string };
 }
 
@@ -23,21 +23,25 @@ describe('claim submission', () => {
     expect(notifications.body.data.unreadCount).toBe(1);
   });
 
-  it('never exposes the private claim message publicly', async () => {
+  it('never exposes the private claim message through item access', async () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const { id } = await createItem(owner);
     await submitClaim(claimant, id, 'My secret proof: serial number XJ-9912 and a scratch.');
 
-    const anonymous = await request(app).get(`/api/items/${id}`);
-    expect(JSON.stringify(anonymous.body)).not.toContain('serial number');
+    const asOwner = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
+    expect(JSON.stringify(asOwner.body)).not.toContain('serial number');
 
-    const otherUser = await registerUser({ email: 'bystander@example.com' });
-    const asUser = await request(app).get(`/api/items/${id}`).set('Cookie', otherUser.cookie);
-    expect(JSON.stringify(asUser.body)).not.toContain('serial number');
+    // Unmatched users cannot even see the listing exists.
+    const bystander = await registerUser({ email: 'bystander@example.com' });
+    const asBystander = await request(app).get(`/api/items/${id}`).set('Cookie', bystander.cookie);
+    expect(asBystander.status).toBe(404);
+
+    const anonymous = await request(app).get(`/api/items/${id}`);
+    expect(anonymous.status).toBe(401);
 
     const list = await request(app).get('/api/items');
-    expect(JSON.stringify(list.body)).not.toContain('serial number');
+    expect(list.status).toBe(404);
   });
 
   it('rejects claiming your own listing', async () => {
@@ -109,7 +113,7 @@ describe('claim decisions', () => {
       .set('Cookie', owner.cookie)
       .send({ decision: 'ACCEPTED' });
 
-    expect((await listItem(id)).status).toBe('CLAIMED');
+    expect((await listItem(id, owner)).status).toBe('CLAIMED');
 
     const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
     expect(notifications.body.data.items[0].type).toBe('CLAIM_ACCEPTED');
@@ -129,7 +133,7 @@ describe('claim decisions', () => {
       .set('Cookie', owner.cookie)
       .send({ decision: 'REJECTED' });
 
-    expect((await listItem(id)).status).toBe('ACTIVE');
+    expect((await listItem(id, owner)).status).toBe('ACTIVE');
 
     const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
     expect(notifications.body.data.items[0].type).toBe('CLAIM_REJECTED');
@@ -178,7 +182,7 @@ describe('claim decisions', () => {
     expect(statuses).toEqual([200, 409]);
 
     // The listing must have exactly one accepted claim.
-    const item = await listItem(id);
+    const item = await listItem(id, owner);
     expect(item.status).toBe('CLAIMED');
 
     const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
@@ -288,9 +292,10 @@ describe('claim visibility and withdrawal', () => {
     expect(returned.body.data.item.status).toBe('RETURNED');
     expect(returned.body.data.item.returnedAt).toBeTruthy();
 
-    // Returned listings disappear from public search results.
-    const list = await request(app).get('/api/items');
-    expect(list.body.data.items).toHaveLength(0);
+    // Returned listings are no longer visible to anyone via the search flow.
+    const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
+    const returnedItem = mine.body.data.items.find((entry: { id: string }) => entry.id === id);
+    expect(returnedItem.status).toBe('RETURNED');
 
     // The claimant learns the item was returned.
     const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
