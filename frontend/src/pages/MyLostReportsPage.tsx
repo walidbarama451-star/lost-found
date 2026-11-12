@@ -88,7 +88,7 @@ export default function MyLostReportsPage() {
                 <div className="lost-reports__summary">
                   <h2>{report.title}</h2>
                   <p className="muted">
-                    {formatDate(report.dateLost)} · reported {formatDate(report.createdAt)} ·{' '}
+                    Reported {formatDate(report.createdAt)} ·{' '}
                     {report.status === 'OPEN' ? 'Open' : 'Closed'}
                   </p>
                 </div>
@@ -149,13 +149,10 @@ export default function MyLostReportsPage() {
                       item={{
                         id: match.itemId,
                         title: match.title,
-                        description: '',
-                        category: match.category,
                         images: [{ url: match.image ?? '' }],
-                        dateFound: match.dateFound,
                         status: match.status,
-                        createdAt: match.dateFound,
-                        updatedAt: match.dateFound,
+                        createdAt: '',
+                        updatedAt: '',
                         owner: { id: '', username: '' },
                       }}
                       actions={
@@ -165,7 +162,7 @@ export default function MyLostReportsPage() {
                             title={
                               match.method === 'photo'
                                 ? 'Photo similarity to your lost item'
-                                : 'Matched by description'
+                                : 'Matched by title'
                             }
                           >
                             {percentage(match.score)} similar

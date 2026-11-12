@@ -39,7 +39,7 @@ Enforce authorization in backend services:
 - Users can edit/delete only their own items.
 - Only the item owner can review claims for that item.
 - Only the claimant can withdraw their own pending claim.
-- Users can read and mark read only their own notifications.
+- Users can read and update only their own profile data.
 
 ## Profile response
 

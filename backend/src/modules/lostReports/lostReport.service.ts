@@ -48,8 +48,6 @@ async function loadCandidates(ownerId: string): Promise<{ docs: ItemDoc[]; candi
   const candidates: MatchCandidate[] = docs.map((doc) => ({
     itemId: doc._id.toString(),
     title: doc.title,
-    description: doc.description,
-    category: doc.category,
     imageEmbeddings: doc.images
       .map((image) => image.embedding)
       .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0),
@@ -70,8 +68,7 @@ async function runSearch(report: LostReportDoc): Promise<LostReportDoc> {
     .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0);
 
   const matches = computeMatches(
-    `${report.title} ${report.description}`,
-    report.category,
+    report.title,
     reportEmbeddings,
     candidates,
   );
@@ -112,9 +109,6 @@ export async function createLostReport(
     const report = await LostReport.create({
       owner: userId,
       title: input.title,
-      description: input.description,
-      category: input.category,
-      dateLost: new Date(`${input.dateLost}T12:00:00.000Z`),
       images: uploaded,
       status: 'OPEN',
     });
@@ -181,9 +175,6 @@ export async function updateLostReport(
 
   const set: Record<string, unknown> = {};
   if (patch.title !== undefined) set.title = patch.title;
-  if (patch.description !== undefined) set.description = patch.description;
-  if (patch.category !== undefined) set.category = patch.category;
-  if (patch.dateLost !== undefined) set.dateLost = new Date(`${patch.dateLost}T12:00:00.000Z`);
   if (patch.status !== undefined) set.status = patch.status;
 
   if (Object.keys(set).length === 0) throw AppError.badRequest('Provide at least one field to update');

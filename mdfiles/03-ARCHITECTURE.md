@@ -38,7 +38,7 @@ backend/
 │   │   ├── users/
 │   │   ├── items/
 │   │   ├── claims/
-│   │   └── notifications/
+│   │   └── lostReports/
 │   ├── shared/
 │   │   ├── errors/
 │   │   ├── types/
@@ -81,7 +81,7 @@ frontend/
 │   │   ├── profile/
 │   │   ├── items/
 │   │   ├── claims/
-│   │   └── notifications/
+│   │   └── lostReports/
 │   ├── pages/
 │   ├── lib/
 │   │   └── api.ts

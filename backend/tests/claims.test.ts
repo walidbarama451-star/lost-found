@@ -8,7 +8,7 @@ async function listItem(itemId: string, owner: TestUser) {
 }
 
 describe('claim submission', () => {
-  it('accepts a claim from another user and notifies the owner', async () => {
+  it('accepts a claim from another user', async () => {
     const owner = await registerUser({ email: 'owner@example.com' });
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const { id } = await createItem(owner);
@@ -16,11 +16,6 @@ describe('claim submission', () => {
     const res = await submitClaim(claimant, id);
     expect(res.status).toBe(201);
     expect(res.body.data.claim.status).toBe('PENDING');
-
-    const notifications = await request(app).get('/api/notifications').set('Cookie', owner.cookie);
-    expect(notifications.body.data.items).toHaveLength(1);
-    expect(notifications.body.data.items[0].type).toBe('CLAIM_SUBMITTED');
-    expect(notifications.body.data.unreadCount).toBe(1);
   });
 
   it('never exposes the private claim message through item access', async () => {
@@ -114,14 +109,9 @@ describe('claim decisions', () => {
       .send({ decision: 'ACCEPTED' });
 
     expect((await listItem(id, owner)).status).toBe('CLAIMED');
-
-    const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
-    expect(notifications.body.data.items[0].type).toBe('CLAIM_ACCEPTED');
-    // Notification must not contain the private proof details.
-    expect(JSON.stringify(notifications.body)).not.toContain('scratch');
   });
 
-  it('keeps the listing ACTIVE when a claim is rejected and notifies the claimant', async () => {
+  it('keeps the listing ACTIVE when a claim is rejected', async () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const { id } = await createItem(owner);
@@ -134,9 +124,6 @@ describe('claim decisions', () => {
       .send({ decision: 'REJECTED' });
 
     expect((await listItem(id, owner)).status).toBe('ACTIVE');
-
-    const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
-    expect(notifications.body.data.items[0].type).toBe('CLAIM_REJECTED');
   });
 
   it('refuses a second decision on an already decided claim', async () => {
@@ -296,11 +283,6 @@ describe('claim visibility and withdrawal', () => {
     const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
     const returnedItem = mine.body.data.items.find((entry: { id: string }) => entry.id === id);
     expect(returnedItem.status).toBe('RETURNED');
-
-    // The claimant learns the item was returned.
-    const notifications = await request(app).get('/api/notifications').set('Cookie', claimant.cookie);
-    const types = notifications.body.data.items.map((n: { type: string }) => n.type);
-    expect(types).toContain('ITEM_RETURNED');
   });
 
   it('refuses to mark an item returned without an accepted claim', async () => {

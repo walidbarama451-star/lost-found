@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import { app, createItem, jpegBuffer, pngBuffer, registerUser } from './helpers.js';
+import { app, createItem, pngBuffer, registerUser } from './helpers.js';
 
 describe('item creation', () => {
   it('publishes a listing with an image as the signed-in user', async () => {
@@ -9,15 +9,11 @@ describe('item creation', () => {
       .post('/api/items')
       .set('Cookie', user.cookie)
       .field('title', 'Black wallet')
-      .field('description', 'Black leather wallet found near the library entrance.')
-      .field('category', 'ACCESSORIES')
-      .field('dateFound', '2026-10-30')
       .attach('images', pngBuffer(), 'wallet.png');
 
     expect(res.status).toBe(201);
     expect(res.body.data.item).toMatchObject({
       title: 'Black wallet',
-      category: 'ACCESSORIES',
       status: 'ACTIVE',
       owner: { id: user.id, username: user.username },
     });
@@ -31,41 +27,10 @@ describe('item creation', () => {
     const res = await request(app)
       .post('/api/items')
       .set('Cookie', user.cookie)
-      .field('title', 'No photo item')
-      .field('description', 'This listing tries to be created without any attached images.')
-      .field('category', 'KEYS')
-      .field('dateFound', '2026-10-30');
+      .field('title', 'No photo item');
 
     expect(res.status).toBe(400);
     expect(res.body.message).toContain('image');
-  });
-
-  it('rejects an unknown category', async () => {
-    const user = await registerUser();
-    const res = await request(app)
-      .post('/api/items')
-      .set('Cookie', user.cookie)
-      .field('title', 'Mystery item')
-      .field('description', 'A listing with a category that is not part of the controlled list.')
-      .field('category', 'WEAPONS')
-      .field('dateFound', '2026-10-30')
-      .attach('images', pngBuffer(), 'x.png');
-
-    expect(res.status).toBe(400);
-  });
-
-  it('rejects a future date found', async () => {
-    const user = await registerUser();
-    const res = await request(app)
-      .post('/api/items')
-      .set('Cookie', user.cookie)
-      .field('title', 'Time traveler keys')
-      .field('description', 'Keys that were supposedly found on a date far in the future.')
-      .field('category', 'KEYS')
-      .field('dateFound', '2099-01-01')
-      .attach('images', jpegBuffer(), 'keys.jpg');
-
-    expect(res.status).toBe(400);
   });
 
   it('requires authentication to create a listing', async () => {
@@ -204,9 +169,6 @@ describe('image uploads', () => {
       .post('/api/items')
       .set('Cookie', user.cookie)
       .field('title', 'Bad file item')
-      .field('description', 'This listing attaches a file that is not an image at all.')
-      .field('category', 'OTHER')
-      .field('dateFound', '2026-10-30')
       .attach('images', Buffer.from('%PDF-1.7 fake'), 'doc.pdf');
 
     expect(res.status).toBe(415);
@@ -218,9 +180,6 @@ describe('image uploads', () => {
       .post('/api/items')
       .set('Cookie', user.cookie)
       .field('title', 'Spoofed image')
-      .field('description', 'This file claims to be a PNG but contains arbitrary non-image bytes.')
-      .field('category', 'OTHER')
-      .field('dateFound', '2026-10-30')
       .attach('images', Buffer.alloc(64, 65), { filename: 'fake.png', contentType: 'image/png' });
 
     expect(res.status).toBe(415);
@@ -233,9 +192,6 @@ describe('image uploads', () => {
       .post('/api/items')
       .set('Cookie', user.cookie)
       .field('title', 'Huge photo item')
-      .field('description', 'This listing tries to attach an image bigger than the allowed limit.')
-      .field('category', 'OTHER')
-      .field('dateFound', '2026-10-30')
       .attach('images', oversized, 'huge.png');
 
     expect(res.status).toBe(413);

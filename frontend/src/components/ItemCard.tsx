@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { resolveImageUrl } from '../lib/api';
-import { categoryLabel, formatDate } from '../lib/format';
 import type { PublicItem } from '../types';
 import StatusBadge from './StatusBadge';
 import './ItemCard.css';
@@ -12,7 +11,7 @@ interface ItemCardProps {
   actions?: ReactNode;
 }
 
-/** Browse card: strong photo, category, found date, and clear status. */
+/** Browse card: strong photo and clear status. */
 export default function ItemCard({ item, actions }: ItemCardProps) {
   const cover = item.images[0]?.url ?? null;
   const src = resolveImageUrl(cover);
@@ -28,13 +27,11 @@ export default function ItemCard({ item, actions }: ItemCardProps) {
       </Link>
       <div className="item-card__body">
         <div className="item-card__badges">
-          <span className="item-card__category">{categoryLabel(item.category)}</span>
           <StatusBadge status={item.status} />
         </div>
         <h3 className="item-card__title">
           <Link to={`/items/${item.id}`}>{item.title}</Link>
         </h3>
-        <p className="item-card__meta muted">Found {formatDate(item.dateFound)}</p>
         {actions ? <div className="item-card__actions">{actions}</div> : null}
       </div>
     </article>

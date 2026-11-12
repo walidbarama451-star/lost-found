@@ -73,9 +73,6 @@ export function cookieOf(res: request.Response): string {
 
 export interface CreateItemOverrides {
   title?: string;
-  description?: string;
-  category?: string;
-  dateFound?: string;
 }
 
 /** Creates a listing with one PNG image as the given user. */
@@ -87,9 +84,6 @@ export async function createItem(
     .post('/api/items')
     .set('Cookie', user.cookie)
     .field('title', overrides.title ?? 'Black wallet')
-    .field('description', overrides.description ?? 'Black leather wallet found near the library entrance.')
-    .field('category', overrides.category ?? 'ACCESSORIES')
-    .field('dateFound', overrides.dateFound ?? '2026-10-30')
     .attach('images', pngBuffer(), 'photo.png');
 
   if (res.status !== 201) {

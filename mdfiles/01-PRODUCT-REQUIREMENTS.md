@@ -26,7 +26,6 @@ People often find belongings but do not know how to return them. People who lose
 - Submit claims on listings.
 - View claims they submitted.
 - Review claims on their own listings.
-- Receive notifications.
 
 ### Administrator — later phase
 - Review reports of abusive or fraudulent content.
@@ -55,19 +54,14 @@ Do not implement an administrator role until normal user permissions are working
 ### Found-item listings
 A listing contains:
 - Title.
-- Description.
-- Category.
 - One or more images.
-- Date found.
-- Optional public contact preference, without exposing private contact details by default.
 - Status.
 
 A user can create, edit, and delete only their own listings. The server must enforce ownership.
 
 ### Browse and search
-- Paginated list of active listings.
-- Search by title and description.
-- Filter by category and date range.
+- Listings are never publicly browsable; a listing is revealed only when a lost-report search matches it.
+- Search matches by photos (image similarity) and by title wording as a fallback.
 - Sort by newest first by default.
 - Provide clear empty, loading, and error states.
 
@@ -80,12 +74,6 @@ A user can create, edit, and delete only their own listings. The server must enf
 - Only the listing owner can decide on claims for their listing.
 - Acceptance must be handled atomically or with a transaction/conditional update so two claims cannot both be accepted.
 - A successful return marks the listing as returned.
-
-### Notifications
-- Create an in-app notification when a claim is submitted.
-- Notify the claimant when their claim is accepted or rejected.
-- Notify relevant users when listing status changes.
-- Users can list and mark their own notifications as read.
 
 ## 5. Non-functional requirements
 

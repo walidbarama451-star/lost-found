@@ -37,15 +37,12 @@ describe('security and privacy', () => {
     }
   });
 
-  it('does not expose other users notifications or claims', async () => {
+  it('does not expose other users claims', async () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const stranger = await registerUser({ email: 'stranger@example.com' });
     const { id } = await createItem(owner);
     await submitClaim(claimant, id);
-
-    const notifications = await request(app).get('/api/notifications').set('Cookie', stranger.cookie);
-    expect(notifications.body.data.items).toHaveLength(0);
 
     const myClaims = await request(app).get('/api/claims/mine').set('Cookie', stranger.cookie);
     expect(myClaims.body.data.items).toHaveLength(0);
@@ -91,9 +88,6 @@ describe('security and privacy', () => {
       .post('/api/items')
       .set('Cookie', owner.cookie)
       .field('title', 'Owned by someone else?')
-      .field('description', 'The client tries to set createdBy and status to values it does not own.')
-      .field('category', 'OTHER')
-      .field('dateFound', '2026-10-30')
       .field('createdBy', stranger.id)
       .field('status', 'HIDDEN')
       .attach('images', pngBuffer(), 'x.png');

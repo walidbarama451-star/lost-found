@@ -1,39 +1,10 @@
 /** Shared API response models. Mirrors backend DTOs (spec 05 / 11). */
 
-export type Category =
-  | 'ELECTRONICS'
-  | 'DOCUMENTS'
-  | 'KEYS'
-  | 'BAGS'
-  | 'ACCESSORIES'
-  | 'CLOTHING'
-  | 'JEWELRY'
-  | 'PETS'
-  | 'OTHER';
-
-export const CATEGORIES: Category[] = [
-  'ELECTRONICS',
-  'DOCUMENTS',
-  'KEYS',
-  'BAGS',
-  'ACCESSORIES',
-  'CLOTHING',
-  'JEWELRY',
-  'PETS',
-  'OTHER',
-];
-
 export type ItemStatus = 'ACTIVE' | 'CLAIMED' | 'RETURNED' | 'CLOSED' | 'HIDDEN';
 
 export const ITEM_STATUSES: ItemStatus[] = ['ACTIVE', 'CLAIMED', 'RETURNED', 'CLOSED', 'HIDDEN'];
 
 export type ClaimStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
-
-export type NotificationType =
-  | 'CLAIM_SUBMITTED'
-  | 'CLAIM_ACCEPTED'
-  | 'CLAIM_REJECTED'
-  | 'ITEM_RETURNED';
 
 export interface User {
   id: string;
@@ -55,10 +26,7 @@ export interface PublicUser {
 export interface PublicItem {
   id: string;
   title: string;
-  description: string;
-  category: Category;
   images: { url: string }[];
-  dateFound: string;
   status: ItemStatus;
   createdAt: string;
   updatedAt: string;
@@ -91,20 +59,15 @@ export interface LostReportMatch {
   score: number;
   method: MatchMethod;
   title: string;
-  category: Category;
-  dateFound: string;
   status: ItemStatus;
   image: string | null;
   available: boolean;
 }
 
-/** A saved "I lost something" search: photo + description + its matches. */
+/** A saved "I lost something" search: photos + its matches. */
 export interface LostReport {
   id: string;
   title: string;
-  description: string;
-  category: Category;
-  dateLost: string;
   status: LostReportStatus;
   images: { url: string }[];
   matches: LostReportMatch[];
@@ -122,18 +85,6 @@ export interface ClaimOnItem {
   claimant: { id: string; username: string };
 }
 
-export interface AppNotification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  relatedItem: string | null;
-  relatedClaim: string | null;
-  read: boolean;
-  readAt: string | null;
-  createdAt: string;
-}
-
 export interface Pagination {
   page: number;
   limit: number;
@@ -144,10 +95,6 @@ export interface Pagination {
 export interface Paginated<T> {
   items: T[];
   pagination: Pagination;
-}
-
-export interface NotificationListResult extends Paginated<AppNotification> {
-  unreadCount: number;
 }
 
 /** Narrows a backend status string; unknown values map to HIDDEN. */

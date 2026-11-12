@@ -1,8 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { resolveImageUrl } from '../lib/api';
-import { categoryLabel } from '../lib/format';
 import { toDisplayError, validateWith } from '../lib/validation';
-import { CATEGORIES } from '../types';
 import {
   emptyItemValues,
   itemSchema,
@@ -27,18 +25,10 @@ interface ItemFormProps {
   footer?: ReactNode;
 }
 
-function todayIso(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
-}
-
 /**
  * Create/edit listing form. Field-level Zod errors mirror the backend rules;
  * API errors surface both a form message and per-field messages.
- */
-export default function ItemForm({
+ */export default function ItemForm({
   initialValues,
   existingImages,
   onRemoveImage,
@@ -47,9 +37,7 @@ export default function ItemForm({
   footer,
 }: ItemFormProps) {
   const isEdit = Boolean(initialValues);
-  const [values, setValues] = useState<ItemFormValues>(
-    initialValues ?? { ...emptyItemValues, dateFound: todayIso() },
-  );
+  const [values, setValues] = useState<ItemFormValues>(initialValues ?? { ...emptyItemValues });
   const [files, setFiles] = useState<File[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -125,7 +113,7 @@ export default function ItemForm({
 
       <div className="form-field">
         <label className="form-label" htmlFor="item-title">
-          Title
+          What did you find?
         </label>
         <input
           id="item-title"
@@ -135,6 +123,7 @@ export default function ItemForm({
           onChange={(event) => set({ title: event.target.value })}
           aria-invalid={Boolean(errorFor('title'))}
           aria-describedby={errorFor('title') ? 'item-title-error' : undefined}
+          placeholder="e.g. black wallet"
           maxLength={120}
           required
         />
@@ -143,68 +132,6 @@ export default function ItemForm({
             {errorFor('title')}
           </p>
         ) : null}
-      </div>
-
-      <div className="form-field">
-        <label className="form-label" htmlFor="item-description">
-          Description
-        </label>
-        <textarea
-          id="item-description"
-          className="form-control"
-          value={values.description}
-          onChange={(event) => set({ description: event.target.value })}
-          aria-invalid={Boolean(errorFor('description'))}
-          aria-describedby={errorFor('description') ? 'item-description-error' : undefined}
-          placeholder="What did you find, distinguishing marks, contents…"
-          required
-        />
-        {errorFor('description') ? (
-          <p className="form-error" id="item-description-error">
-            {errorFor('description')}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="item-form__row">
-        <div className="form-field">
-          <label className="form-label" htmlFor="item-category">
-            Category
-          </label>
-          <select
-            id="item-category"
-            className="form-control"
-            value={values.category}
-            onChange={(event) => set({ category: event.target.value })}
-            aria-invalid={Boolean(errorFor('category'))}
-            required
-          >
-            <option value="">Choose a category…</option>
-            {CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {categoryLabel(category)}
-              </option>
-            ))}
-          </select>
-          {errorFor('category') ? <p className="form-error">{errorFor('category')}</p> : null}
-        </div>
-
-        <div className="form-field">
-          <label className="form-label" htmlFor="item-date">
-            Date found
-          </label>
-          <input
-            id="item-date"
-            className="form-control"
-            type="date"
-            value={values.dateFound}
-            max={todayIso()}
-            onChange={(event) => set({ dateFound: event.target.value })}
-            aria-invalid={Boolean(errorFor('dateFound'))}
-            required
-          />
-          {errorFor('dateFound') ? <p className="form-error">{errorFor('dateFound')}</p> : null}
-        </div>
       </div>
 
       {existingImages && existingImages.length > 0 ? (

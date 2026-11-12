@@ -8,11 +8,10 @@ Help people report found belongings and help owners find and safely reclaim them
 
 A user can:
 - Register, sign in, and manage a profile.
-- Publish an item they found, including photos, description, category, and date.
-- Browse and search found-item listings.
+- Publish an item they found, including photos and a title.
+- Run a lost-item photo search that reveals matching found-item listings.
 - Submit a private claim explaining why an item belongs to them.
 - Communicate through a safe contact workflow.
-- Receive notifications about claims and listing status.
 
 ## Technology decisions
 
@@ -41,7 +40,6 @@ A user can:
 - `07-ITEMS-AND-SEARCH.md` — found-item listings, filters, and lifecycle.
 - `08-CLAIMS-AND-RECOVERY.md` — ownership claims and safe return process.
 - `09-IMAGES-AND-FILES.md` — upload validation and Cloudinary.
-- `10-NOTIFICATIONS.md` — in-app notifications and optional email.
 - `11-FRONTEND-SPECIFICATION.md` — React pages, components, and state.
 - `12-SECURITY-AND-PRIVACY.md` — security, abuse prevention, and privacy.
 - `13-TESTING-PLAN.md` — unit, integration, and end-to-end tests.
@@ -57,7 +55,7 @@ A user can:
 3. Implement authentication and user profiles.
 4. Implement item creation, listing, editing, deletion, and search.
 5. Implement image uploads.
-6. Implement claims and notifications.
+6. Implement claims.
 7. Build the React frontend and connect it to the API.
 8. Add tests, security checks, and deployment configuration.
 

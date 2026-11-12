@@ -7,9 +7,6 @@ import './ItemFormPages.css';
 function buildFormData(values: ItemFormValues, files: File[]): FormData {
   const form = new FormData();
   form.append('title', values.title);
-  form.append('description', values.description);
-  form.append('category', values.category);
-  form.append('dateFound', values.dateFound);
   for (const file of files) form.append('images', file);
   return form;
 }
@@ -29,7 +26,7 @@ export default function ItemCreatePage() {
       <div className="page-header">
         <div>
           <h1>Post a found item</h1>
-          <p className="muted">Add a clear photo and useful details about the item.</p>
+          <p className="muted">Add a clear photo and a short line about what you found.</p>
         </div>
       </div>
 

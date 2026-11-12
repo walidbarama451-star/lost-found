@@ -6,7 +6,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import StatusBadge from '../components/StatusBadge';
 import { resolveImageUrl } from '../lib/api';
-import { categoryLabel, formatDate, formatDateTime } from '../lib/format';
+import { formatDateTime } from '../lib/format';
 import { toDisplayError } from '../lib/validation';
 import { useAuth } from '../features/auth/AuthContext';
 import { useApi } from '../lib/useApi';
@@ -97,17 +97,12 @@ export default function ItemDetailPage() {
 
         <div className="item-detail__info card">
           <div className="item-detail__badges">
-            <span className="item-detail__category">{categoryLabel(item.category)}</span>
             <StatusBadge status={item.status} />
           </div>
 
           <h1>{item.title}</h1>
 
           <dl className="item-detail__meta">
-            <div>
-              <dt>Found on</dt>
-              <dd>{formatDate(item.dateFound)}</dd>
-            </div>
             <div>
               <dt>Posted by</dt>
               <dd>
@@ -125,11 +120,6 @@ export default function ItemDetailPage() {
               <dd>{formatDateTime(item.createdAt)}</dd>
             </div>
           </dl>
-
-          <section className="item-detail__description">
-            <h2>Description</h2>
-            <p>{item.description}</p>
-          </section>
 
           {isOwner ? (
             <div className="item-detail__owner-actions">

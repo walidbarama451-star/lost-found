@@ -7,8 +7,6 @@ import type { MatchMethod } from './lostReport.model.js';
 export interface MatchCandidate {
   itemId: string;
   title: string;
-  description: string;
-  category: string;
   /** Vectors for the item's photos (may be empty when the service was down). */
   imageEmbeddings: number[][];
 }
@@ -40,25 +38,23 @@ function bestPhotoScore(
 
 /**
  * Text fallback for pairs without photo vectors (service unavailable):
- * fuzzy wording similarity plus a small category bonus, capped below the
- * photo ceiling so a text match never outranks a real photo match.
+ * title-wording similarity, capped below the photo ceiling so a text match
+ * never outranks a real photo match.
  */
-function textScore(reportText: string, reportCategory: string, candidate: MatchCandidate): number {
-  const similarity = textSimilarity(reportText, `${candidate.title} ${candidate.description}`);
-  const categoryBonus = candidate.category === reportCategory ? 0.15 : 0;
-  return Math.min(0.95, similarity * 0.85 + categoryBonus);
+function textScore(reportText: string, candidate: MatchCandidate): number {
+  const similarity = textSimilarity(reportText, candidate.title);
+  return Math.min(0.95, similarity * 0.85);
 }
 
 /**
  * Scores every candidate and keeps those above their method's threshold,
  * strongest first. Photo matches use embeddings and the strict photo
  * threshold; when the report or the item has no vectors (embedding service
- * unavailable) the text fallback applies with its own, more forgiving
- * threshold — descriptions rarely use identical wording.
+ * unavailable) the title-text fallback applies with its own, more forgiving
+ * threshold.
  */
 export function computeMatches(
   reportText: string,
-  reportCategory: string,
   reportEmbeddings: number[][],
   candidates: MatchCandidate[],
 ): MatchResult[] {
@@ -77,7 +73,7 @@ export function computeMatches(
       qualifies = score >= photoThreshold;
     }
     if (!qualifies) {
-      const fallback = textScore(reportText, reportCategory, candidate);
+      const fallback = textScore(reportText, candidate);
       if (fallback >= textThreshold) {
         score = fallback;
         method = 'text';

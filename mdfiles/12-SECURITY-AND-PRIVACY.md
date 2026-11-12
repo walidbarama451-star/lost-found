@@ -32,14 +32,14 @@
 
 - Derive user ID from verified authentication.
 - Verify ownership for every private read/write.
-- Scope notification and claim queries to the current user.
+- Scope claim queries to the current user.
 - Do not rely on frontend route protection alone.
 
 ## Privacy
 
 - Keep claim messages private.
 - Do not publish private phone numbers or email addresses by default.
-- Avoid exposing identifying proof details in listing text or notifications.
+- Avoid exposing identifying proof details in listing text or public responses.
 - Collect only data necessary for the service.
 - Define a retention and deletion policy.
 

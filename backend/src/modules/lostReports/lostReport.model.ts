@@ -1,5 +1,4 @@
 import { Schema, model, type HydratedDocument, type Model, type Types } from 'mongoose';
-import { ITEM_CATEGORIES } from '../items/item.model.js';
 
 export type LostReportStatus = 'OPEN' | 'CLOSED';
 
@@ -22,9 +21,6 @@ export interface LostReportRecord {
   _id: Types.ObjectId;
   owner: Types.ObjectId;
   title: string;
-  description: string;
-  category: string;
-  dateLost: Date;
   images: LostReportImage[];
   status: LostReportStatus;
   /** Best matches from the last photo search, strongest first. */
@@ -57,9 +53,6 @@ const lostReportSchema = new Schema<LostReportRecord>(
   {
     owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true, trim: true, minlength: 3, maxlength: 120 },
-    description: { type: String, required: true, trim: true, minlength: 10, maxlength: 5000 },
-    category: { type: String, required: true, enum: ITEM_CATEGORIES },
-    dateLost: { type: Date, required: true },
     images: {
       type: [imageSchema],
       required: true,

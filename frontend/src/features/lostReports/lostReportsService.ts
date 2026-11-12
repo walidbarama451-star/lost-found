@@ -45,9 +45,6 @@ export async function searchLostReport(reportId: string): Promise<LostReport> {
 
 export interface LostReportPatch {
   title?: string;
-  description?: string;
-  category?: string;
-  dateLost?: string;
   status?: LostReportStatus;
 }
 

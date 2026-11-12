@@ -2,7 +2,6 @@ import { Types } from 'mongoose';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
 import { Item } from '../items/item.model.js';
-import { createNotification } from '../notifications/notification.service.js';
 import { toClaimOnItemDto, toMyClaimDto, type ClaimOnItemDto, type MyClaimDto } from './claim.dto.js';
 import { Claim, type ClaimDoc, type ClaimRecord } from './claim.model.js';
 
@@ -31,15 +30,6 @@ export async function submitClaim(userId: string, itemId: string, message: strin
     if (isDuplicateKey(error)) throw AppError.conflict('You already have a pending claim on this listing');
     throw error;
   }
-
-  await createNotification({
-    recipient: item.createdBy.toString(),
-    type: 'CLAIM_SUBMITTED',
-    title: 'Someone submitted a claim',
-    message: `A new claim was made on "${item.title}". Open the listing to review it.`,
-    relatedItem: item._id.toString(),
-    relatedClaim: claim._id.toString(),
-  });
 
   await claim.populate('claimant', 'username');
   return toClaimOnItemDto(claim as unknown as Parameters<typeof toClaimOnItemDto>[0]);
@@ -122,15 +112,6 @@ export async function decideClaim(
     );
     if (!updated) throw AppError.conflict('This claim has already been decided');
 
-    await createNotification({
-      recipient: claim.claimant.toString(),
-      type: 'CLAIM_REJECTED',
-      title: 'Your claim was rejected',
-      message: 'The listing owner rejected your claim on an item.',
-      relatedItem: claim.item.toString(),
-      relatedClaim: claim._id.toString(),
-    });
-
     return { id: updated._id.toString(), status: updated.status };
   }
 
@@ -154,15 +135,6 @@ export async function decideClaim(
     );
     throw AppError.conflict('This listing can no longer be claimed');
   }
-
-  await createNotification({
-    recipient: claim.claimant.toString(),
-    type: 'CLAIM_ACCEPTED',
-    title: 'Your claim was accepted',
-    message: 'The listing owner accepted your claim. Arrange a safe handover.',
-    relatedItem: claim.item.toString(),
-    relatedClaim: claim._id.toString(),
-  });
 
   return { id: accepted._id.toString(), status: accepted.status };
 }

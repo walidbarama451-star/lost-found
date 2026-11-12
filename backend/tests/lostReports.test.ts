@@ -21,18 +21,12 @@ afterEach(() => {
 function createLostReport(user: { cookie: string }, overrides: Record<string, string> = {}) {
   const fields = {
     title: 'Lost my black wallet',
-    description: 'Black leather wallet with a card holder, lost near the library.',
-    category: 'ACCESSORIES',
-    dateLost: '2026-10-30',
     ...overrides,
   };
   return request(app)
     .post('/api/lost-reports')
     .set('Cookie', user.cookie)
     .field('title', fields.title)
-    .field('description', fields.description)
-    .field('category', fields.category)
-    .field('dateLost', fields.dateLost)
     .attach('images', pngBuffer(96), 'mine.png');
 }
 
@@ -41,9 +35,6 @@ describe('lost report creation and photo matching', () => {
     const res = await request(app)
       .post('/api/lost-reports')
       .field('title', 'Lost wallet')
-      .field('description', 'Black leather wallet lost near the library entrance.')
-      .field('category', 'ACCESSORIES')
-      .field('dateLost', '2026-10-30')
       .attach('images', pngBuffer(), 'mine.png');
     expect(res.status).toBe(401);
   });
@@ -53,10 +44,7 @@ describe('lost report creation and photo matching', () => {
     const res = await request(app)
       .post('/api/lost-reports')
       .set('Cookie', user.cookie)
-      .field('title', 'No photo report')
-      .field('description', 'This report tries to be created without any attached photos.')
-      .field('category', 'KEYS')
-      .field('dateLost', '2026-10-30');
+      .field('title', 'No photo report');
     expect(res.status).toBe(400);
     expect(res.body.message).toContain('photo');
   });
@@ -87,15 +75,13 @@ describe('lost report creation and photo matching', () => {
     expect(JSON.stringify(detail.body)).not.toContain('publicId');
   });
 
-  it('does not match unrelated photos or descriptions', async () => {
+  it('does not match unrelated photos or titles', async () => {
     const finder = await registerUser({ email: 'finder@example.com' });
     const searcher = await registerUser({ email: 'searcher@example.com' });
 
     state.vectors.set(pngBuffer().length, [1, 0, 0, 0]);
     const { id: itemId } = await createItem(finder, {
       title: 'Silver keys ring',
-      description: 'A small ring of silver keys found at the sports hall reception.',
-      category: 'KEYS',
     });
     state.vectors.set(pngBuffer(96).length, [0, 0, 1, 1]);
 
@@ -134,20 +120,18 @@ describe('lost report creation and photo matching', () => {
     // Near-identical wording clears the text threshold.
     const res = await createLostReport(searcher, {
       title: 'Black wallet',
-      description: 'Black leather wallet found near the library entrance',
     });
     expect(res.status).toBe(201);
     expect(res.body.data.report.matches).toHaveLength(1);
     expect(res.body.data.report.matches[0]).toMatchObject({ itemId, method: 'text', available: true });
   });
 
-  it('matches partially overlapping descriptions without identical wording', async () => {
+  it('matches similar titles without identical wording', async () => {
     const finder = await registerUser({ email: 'finder@example.com' });
     const searcher = await registerUser({ email: 'searcher@example.com' });
 
     const { id: itemId } = await createItem(finder, {
-      title: 'Wallet turned in',
-      description: 'Black wallet with a card holder, found in the library cafe.',
+      title: 'Black wallet found',
     });
 
     const res = await createLostReport(searcher);
@@ -156,13 +140,12 @@ describe('lost report creation and photo matching', () => {
     expect(res.body.data.report.matches[0]).toMatchObject({ itemId, method: 'text' });
   });
 
-  it('does not match unrelated descriptions', async () => {
+  it('does not match unrelated titles', async () => {
     const finder = await registerUser({ email: 'finder@example.com' });
     const searcher = await registerUser({ email: 'searcher@example.com' });
 
     await createItem(finder, {
       title: 'Set of keys',
-      description: 'Silver key ring with three keys on a blue strap.',
     });
 
     const res = await createLostReport(searcher);

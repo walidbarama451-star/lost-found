@@ -78,24 +78,19 @@ Never accept `role`, password hash, or arbitrary account flags from profile upda
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | POST | `/items` | Yes | Create listing |
-| GET | `/items` | No | Browse/search active listings |
-| GET | `/items/:itemId` | No | Get public listing detail |
+| GET | `/items/:itemId` | Yes (owner or matched searcher) | Get listing detail |
 | PATCH | `/items/:itemId` | Yes + owner | Update own listing |
 | DELETE | `/items/:itemId` | Yes + owner | Delete/close own listing |
 | GET | `/items/mine` | Yes | Get own listings |
 
-Example query:
-`GET /items?q=black%20wallet&category=ACCESSORIES&page=1&limit=12&sort=newest`
-
-Example create body (if images are uploaded separately):
+Example create body:
 ```json
 {
-  "title": "Black wallet",
-  "description": "Black leather wallet found near the library.",
-  "category": "ACCESSORIES",
-  "dateFound": "2026-10-30"
+  "title": "Black wallet"
 }
 ```
+
+Listings are never publicly browsable — there is no `GET /items` list endpoint.
 
 ## Claims
 
@@ -123,14 +118,6 @@ Decision body:
 ```
 
 The private claim message must never appear in public item responses.
-
-## Notifications
-
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| GET | `/notifications` | Yes | List own notifications |
-| PATCH | `/notifications/:notificationId/read` | Yes | Mark own notification read |
-| PATCH | `/notifications/read-all` | Yes | Mark all own notifications read |
 
 ## Pagination
 

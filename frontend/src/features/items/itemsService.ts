@@ -3,26 +3,10 @@
 import { apiRequest } from '../../lib/api';
 import type { ItemStatus, OwnerItem, Paginated, PublicItem } from '../../types';
 
-export interface ItemListQuery {
-  q?: string;
-  category?: string;
-  fromDate?: string;
-  toDate?: string;
-  page?: number;
-  limit?: number;
-  sort?: 'newest' | 'oldest';
-}
-
 export interface MyItemsQuery {
   status?: ItemStatus | '';
   page?: number;
   limit?: number;
-}
-
-export async function listItems(query: ItemListQuery): Promise<Paginated<PublicItem>> {
-  return apiRequest<Paginated<PublicItem>>('/items', {
-    query: { ...query, sort: query.sort ?? 'newest' },
-  });
 }
 
 export async function listMyItems(query: MyItemsQuery): Promise<Paginated<OwnerItem>> {
@@ -45,9 +29,6 @@ export async function createItem(form: FormData): Promise<OwnerItem> {
 
 export interface ItemPatch {
   title?: string;
-  description?: string;
-  category?: string;
-  dateFound?: string;
 }
 
 export async function updateItem(itemId: string, patch: ItemPatch): Promise<OwnerItem> {

@@ -52,7 +52,7 @@
 
   /* Layout */
   --container-width: 72rem;
-  --navbar-height: 3.75rem;
+  --sidebar-width: 15rem;
 
   /* Type */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

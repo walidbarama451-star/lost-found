@@ -28,23 +28,19 @@ The frontend is a browser client. It must never connect directly to MongoDB or c
 - Submit claim.
 - My submitted claims.
 - Claims received on own listings.
-- Notifications.
 - Profile.
 
 ## Main components
 
 - `AppLayout`
-- `Navbar`
+- `Sidebar`
 - `ProtectedRoute`
 - `ItemCard`
 - `ItemGrid`
-- `ItemSearchBar`
-- `ItemFilters`
 - `ItemForm`
 - `ImageUploader`
 - `ClaimForm`
 - `ClaimStatusBadge`
-- `NotificationList`
 - `Pagination`
 - `LoadingState`
 - `ErrorState`
@@ -63,7 +59,6 @@ The frontend is a browser client. It must never connect directly to MongoDB or c
 - `/my-items`
 - `/claims`
 - `/items/:itemId/claims`
-- `/notifications`
 - `/profile`
 
 Protect authenticated routes. Hiding a button is not authorization; the backend must still enforce every permission.
@@ -96,7 +91,6 @@ Vite environment variables exposed to the browser must be treated as public. Nev
 Use a clean, trustworthy visual style:
 - Clear “Found items” browsing.
 - Strong, readable item photos.
-- Visible category and date found.
 - Clear status labels.
 - Simple forms.
 - Privacy reminder near claim forms.

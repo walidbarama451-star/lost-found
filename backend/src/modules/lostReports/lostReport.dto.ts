@@ -7,8 +7,6 @@ export interface LostReportMatchDto {
   score: number;
   method: MatchMethod;
   title: string;
-  category: string;
-  dateFound: string;
   status: string;
   image: string | null;
   /** False when the listing was closed/claimed after being matched. */
@@ -18,9 +16,6 @@ export interface LostReportMatchDto {
 export interface LostReportDto {
   id: string;
   title: string;
-  description: string;
-  category: string;
-  dateLost: string;
   status: string;
   images: { url: string }[];
   matches: LostReportMatchDto[];
@@ -39,9 +34,6 @@ export function toLostReportDto(
   return {
     id: report._id.toString(),
     title: report.title,
-    description: report.description,
-    category: report.category,
-    dateLost: report.dateLost.toISOString(),
     status: report.status,
     images: report.images.map((image) => ({ url: image.url })),
     matches: report.matches
@@ -53,8 +45,6 @@ export function toLostReportDto(
           score: match.score,
           method: match.method,
           title: doc?.title ?? 'Listing unavailable',
-          category: doc?.category ?? 'OTHER',
-          dateFound: (doc?.dateFound ?? new Date(0)).toISOString(),
           status: doc?.status ?? 'CLOSED',
           image: images[0]?.url ?? null,
           available: doc?.status === 'ACTIVE',

@@ -9,10 +9,7 @@ export interface ItemImageDto {
 export interface ItemDto {
   id: string;
   title: string;
-  description: string;
-  category: string;
   images: ItemImageDto[];
-  dateFound: string;
   status: ItemStatus;
   createdAt: string;
   updatedAt: string;
@@ -38,10 +35,7 @@ function baseDto(item: PopulatedItem): ItemDto {
   return {
     id: item._id.toString(),
     title: item.title,
-    description: item.description,
-    category: item.category,
     images: item.images.map((image) => ({ url: image.url })),
-    dateFound: item.dateFound.toISOString(),
     status: item.status,
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),

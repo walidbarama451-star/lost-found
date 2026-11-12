@@ -3,9 +3,7 @@ import { deleteImage, storeImage } from '../../config/imageStorage.js';
 import { embedImage } from '../../config/imageEmbedding.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
-import { createNotification } from '../notifications/notification.service.js';
 import { LostReport } from '../lostReports/lostReport.model.js';
-import { Claim } from '../claims/claim.model.js';
 import { asPopulated, toOwnerItem, toPublicItem, type ItemDto } from './item.dto.js';
 import { Item, type ItemDoc, type ItemRecord, type ItemStatus } from './item.model.js';
 import type { CreateItemInput, MyItemsQuery, UpdateItemInput } from './item.schema.js';
@@ -98,9 +96,6 @@ export async function createItem(
   try {
     const doc = await Item.create({
       title: input.title,
-      description: input.description,
-      category: input.category,
-      dateFound: new Date(`${input.dateFound}T12:00:00.000Z`),
       images: uploaded,
       createdBy: userId,
       status: 'ACTIVE',
@@ -118,9 +113,6 @@ export async function createItem(
 function buildUpdateSet(patch: UpdateItemInput): Record<string, unknown> {
   const set: Record<string, unknown> = {};
   if (patch.title !== undefined) set.title = patch.title;
-  if (patch.description !== undefined) set.description = patch.description;
-  if (patch.category !== undefined) set.category = patch.category;
-  if (patch.dateFound !== undefined) set.dateFound = new Date(`${patch.dateFound}T12:00:00.000Z`);
   return set;
 }
 
@@ -173,20 +165,6 @@ export async function markReturned(itemId: string, userId: string): Promise<Item
   }
 
   await doc.populate('createdBy', 'username');
-
-  if (doc.acceptedClaim) {
-    const claim = await Claim.findById(doc.acceptedClaim);
-    if (claim) {
-      await createNotification({
-        recipient: claim.claimant.toString(),
-        type: 'ITEM_RETURNED',
-        title: 'Item marked as returned',
-        message: `"${doc.title}" has been marked as returned. Thank you for using Lost & Found!`,
-        relatedItem: doc._id.toString(),
-        relatedClaim: claim._id.toString(),
-      });
-    }
-  }
 
   return toOwnerItem(asPopulated(doc));
 }

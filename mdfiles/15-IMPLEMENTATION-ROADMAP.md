@@ -58,15 +58,7 @@ Work in small phases. Do not generate the entire application in one step.
 - [ ] Implement claim withdrawal if in scope.
 - [ ] Add privacy and authorization tests.
 
-## Phase 6 — Notifications
-- [ ] Create Notification model.
-- [ ] Notify item owner on new claim.
-- [ ] Notify claimant on decision.
-- [ ] List own notifications.
-- [ ] Mark one/all as read.
-- [ ] Add tests.
-
-## Phase 7 — React foundation
+## Phase 6 — React foundation
 - [ ] Create React + TypeScript + Vite app.
 - [ ] Configure routes and layouts.
 - [ ] Create API client.
@@ -82,7 +74,6 @@ Work in small phases. Do not generate the entire application in one step.
 - [ ] Build create/edit listing forms.
 - [ ] Build image uploader.
 - [ ] Build claims pages.
-- [ ] Build notifications page.
 - [ ] Build profile page.
 - [ ] Add responsive and accessible UI.
 

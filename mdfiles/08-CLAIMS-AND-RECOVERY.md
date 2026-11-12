@@ -22,7 +22,7 @@ Backend checks:
 
 - Claim message is visible only to the claimant and item owner.
 - Never include claim message in public item API results.
-- Do not show private proof details in notifications; notifications should link to the claim page.
+- Do not show private proof details publicly; the claim message stays between claimant and listing owner.
 - Avoid requesting unnecessary sensitive information.
 
 ## Review

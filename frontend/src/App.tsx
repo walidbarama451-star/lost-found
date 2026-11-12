@@ -13,7 +13,6 @@ import MyClaimsPage from './pages/MyClaimsPage';
 import MyItemsPage from './pages/MyItemsPage';
 import MyLostReportsPage from './pages/MyLostReportsPage';
 import NotFoundPage from './pages/NotFoundPage';
-import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import UserProfilePage from './pages/UserProfilePage';
@@ -97,14 +96,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyClaimsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
               </ProtectedRoute>
             }
           />

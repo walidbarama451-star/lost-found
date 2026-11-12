@@ -7,20 +7,19 @@ Built with TypeScript on both sides — React (Vite) in the browser, an Express 
 ## How it works
 
 1. **Finders publish found items** with 1–5 photos — these listings are **hidden from everyone**. There is no public browse page.
-2. **Owners of lost items search with a photo**: they upload a photo of their missed item (or something that looks close), describe it, pick a category and a date. Each search is saved as a **lost report**.
+2. **Owners of lost items search with a photo**: they upload a photo of their missed item (or something that looks close) and give the search a short title. Each search is saved as a **lost report**.
 3. **Photo matching**: the search compares the report's photos against the photos of every active found item using AI image embeddings (CLIP via the Hugging Face Inference API). Found items that look similar (similarity ≥ threshold) appear to the searcher with a "% similar" badge.
 4. **The searcher checks whether it's really theirs** by opening the matched listing and submitting a private claim. The existing claim flow (owner accepts → item marked returned) completes the handover.
 
-Without an `HF_TOKEN` configured, matching gracefully falls back to text similarity (description overlap + category), so the app still works with zero external accounts.
+Without an `HF_TOKEN` configured, matching gracefully falls back to title-wording text similarity, so the app still works with zero external accounts.
 
 ## Features (MVP)
 
 - **Accounts** — register, sign in, sign out, and edit your profile. Passwords are bcrypt-hashed and never leave the server; sessions live in an **HttpOnly cookie** (no tokens in JavaScript).
-- **Listings** — publish a found item with 1–5 photos, category, and date found. Owners edit or soft-close only their own listings.
+- **Listings** — publish a found item with 1–5 photos and a title. Owners edit or soft-close only their own listings.
 - **Lost reports & photo search** — signed-in users create photo-based searches for their lost items; matches are stored on the report and can be refreshed any time (`POST /lost-reports/:id/search`) to catch newly published found items.
 - **Claims** — a signed-in user privately explains why an item is theirs. The message is visible only to the claimant and the listing owner. Owners accept or reject; acceptance is an **atomic, race-safe state transition** (exactly one accepted claim per listing).
 - **Recovery flow** — accepted claim → listing `CLAIMED` → owner marks `RETURNED`.
-- **Notifications** — in-app notifications for claim submitted/accepted/rejected and item returned, with unread counts and mark-read.
 - **Security** — server-side validation (Zod), ownership enforced in services, CSRF origin checks, rate limiting, Helmet headers, upload type/size/magic-byte validation.
 
 ## Repository layout
@@ -30,11 +29,11 @@ Without an `HF_TOKEN` configured, matching gracefully falls back to text similar
 │   ├── src/
 │   │   ├── config/         env, database, image storage
 │   │   ├── middleware/     auth, validation, CSRF, uploads, errors, rate limits
-│   │   ├── modules/        auth, users, items, lostReports, claims, notifications
+│   │   ├── modules/        auth, users, items, lostReports, claims
 │   │   ├── shared/         errors, types, utils
 │   │   ├── app.ts          express app (also used by tests)
 │   │   └── server.ts       entry point
-│   └── tests/              89 integration + unit tests (Vitest + Supertest)
+│   └── tests/              integration + unit tests (Vitest + Supertest)
 ├── frontend/         React + TypeScript + Vite client
 │   └── src/                app router, components, features, pages, plain CSS
 ├── docs/             OpenAPI specification (served interactively at /api/docs)
@@ -101,7 +100,7 @@ Smoke checks:
 
 ```powershell
 cd backend
-npm test        # 89 tests: auth, items, lost reports + matching, claims, notifications, security, units
+npm test        # tests: auth, items, lost reports + matching, claims, security, units
 
 cd ../frontend
 npm test        # component tests (Vitest + Testing Library)
@@ -120,7 +119,6 @@ Base URL `http://localhost:5000/api` — full contract in [`docs/openapi.yaml`](
 | Items | `POST /items`, `GET /items/mine`, `GET /items/:id` (owner + matched searchers only), `PATCH /items/:id`, `DELETE /items/:id`, `PATCH /items/:id/return`, `POST /items/:id/images`, `DELETE /items/:id/images/:publicId` |
 | Lost reports | `POST /lost-reports`, `GET /lost-reports`, `GET /lost-reports/:id`, `POST /lost-reports/:id/search`, `PATCH /lost-reports/:id`, `DELETE /lost-reports/:id` |
 | Claims | `POST /claims`, `GET /claims/mine`, `GET /items/:id/claims`, `PATCH /claims/:id/decision`, `PATCH /claims/:id/withdraw` |
-| Notifications | `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all` |
 
 Every response uses `{ success, data, message? }` / `{ success, false, message, errors[] }` envelopes.
 
@@ -129,7 +127,7 @@ Every response uses `{ success, data, message? }` / `{ success, false, message, 
 - **Cookie sessions instead of localStorage tokens** — an HttpOnly + SameSite=Lax cookie keeps the JWT out of JavaScript; mutating requests additionally verify the `Origin` header (CSRF defence).
 - **Atomic claims without transactions** — local MongoDB has no replica set, so claim acceptance uses two guarded `findOneAndUpdate` operations plus a compensating revert: each update only matches the expected prior state, guaranteeing at most one `ACCEPTED` claim per listing under concurrency. A partial unique index (`item + claimant` where `status = PENDING`) blocks duplicate pending claims at the database level.
 - **Image storage** — Cloudinary when configured; otherwise a local disk fallback under `backend/uploads/` (gitignored) served from `/uploads`, so the app works with zero external accounts. Stored as `{ url, publicId }`; remote assets are deleted only after the database update succeeds.
-- **Photo matching** — each uploaded photo gets a CLIP-style embedding vector (Hugging Face Inference API) stored on the image record. The lost-report matcher computes the best cosine similarity between the report's photos and each found item's photos; below the threshold (or when no vectors exist) it falls back to token-overlap text scoring with a category bonus. Embeddings are excluded from every API response and from default queries (`select: false`). `npm run backfill-embeddings` computes vectors for photos uploaded before matching existed.
+- **Photo matching** — each uploaded photo gets a CLIP-style embedding vector (Hugging Face Inference API) stored on the image record. The lost-report matcher computes the best cosine similarity between the report's photos and each found item's photos; below the threshold (or when no vectors exist) it falls back to title-wording text similarity. Embeddings are excluded from every API response and from default queries (`select: false`). `npm run backfill-embeddings` computes vectors for photos uploaded before matching existed.
 
 ## Security notes
 

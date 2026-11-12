@@ -21,10 +21,7 @@ Do not name a field `password` if it stores a hash; use `passwordHash` to make i
 Suggested fields:
 - `_id`: ObjectId.
 - `title`: string, required, length-limited.
-- `description`: string, required, length-limited.
-- `category`: enum/string from a maintained category list.
-- `images`: array of `{ url, publicId }`.
-- `dateFound`: Date.
+- `images`: array of `{ url, publicId }` (plus optional photo embeddings).
 - `status`: `ACTIVE | CLAIMED | RETURNED | CLOSED | HIDDEN`.
 - `createdBy`: ObjectId reference to User.
 - `acceptedClaim`: optional ObjectId reference to Claim.
@@ -33,11 +30,7 @@ Suggested fields:
 
 Indexes:
 - `{ status: 1, createdAt: -1 }`
-- `{ category: 1, status: 1, createdAt: -1 }`
 - `{ createdBy: 1, createdAt: -1 }`
-- Text index on suitable title/description fields if MongoDB text search is used.
-
-Avoid creating duplicate text indexes. Choose one search strategy and document its limitations.
 
 ## 3. Claim collection
 
@@ -57,30 +50,25 @@ Indexes:
 
 Consider a partial unique index for one pending claim per claimant/item pair, or enforce this rule transactionally in the service. Ensure the exact index semantics match the selected MongoDB deployment.
 
-## 4. Notification collection
+## 4. Lost report collection
 
 Suggested fields:
 - `_id`: ObjectId.
-- `recipient`: ObjectId reference to User.
-- `type`: enum such as `CLAIM_SUBMITTED`, `CLAIM_ACCEPTED`, `CLAIM_REJECTED`, `ITEM_RETURNED`.
-- `title`: string.
-- `message`: string.
-- `relatedItem`: optional ObjectId.
-- `relatedClaim`: optional ObjectId.
-- `readAt`: optional Date.
-- `createdAt`: Date.
-
-Indexes:
-- `{ recipient: 1, createdAt: -1 }`
-- `{ recipient: 1, readAt: 1 }`
+- `owner`: ObjectId reference to User.
+- `title`: string, required.
+- `images`: array of `{ url, publicId }` (plus optional photo embeddings).
+- `status`: `OPEN | CLOSED`.
+- `matches`: array of `{ item, score, method, matchedAt }`.
+- `lastSearchedAt`: optional Date.
+- `createdAt`, `updatedAt`: timestamps.
 
 ## 5. Relationships
 
 - One User can create many Items.
 - One Item can have many Claims.
 - One User can submit many Claims.
-- One User can receive many Notifications.
 - A Claim belongs to one Item and one claimant.
+- A LostReport belongs to one User and can reference many matched Items.
 
 Use ObjectId references. Populate only fields required for the response. Avoid returning full user documents in public listing results.
 

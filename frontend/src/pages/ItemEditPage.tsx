@@ -23,19 +23,13 @@ interface EditPayload {
 function toFormValues(item: OwnerItem): ItemFormValues {
   return {
     title: item.title,
-    description: item.description,
-    category: item.category,
-    dateFound: item.dateFound.slice(0, 10),
   };
 }
 
-/** PATCH body: only fields the schema accepts; empty optionals omitted. */
+/** PATCH body: only fields the schema accepts. */
 function buildPatch(values: ItemFormValues) {
   return {
     title: values.title,
-    description: values.description,
-    category: values.category,
-    dateFound: values.dateFound,
   };
 }
 

@@ -6,27 +6,16 @@ import ItemCard from '../components/ItemCard';
 import { useAuth } from '../features/auth/AuthContext';
 import { emptyLostReportValues, lostReportSchema, type LostReportFormValues } from '../features/lostReports/lostReportSchemas';
 import { createLostReport } from '../features/lostReports/lostReportsService';
-import { categoryLabel } from '../lib/format';
 import { toDisplayError, validateWith } from '../lib/validation';
 import type { LostReport } from '../types';
 import './HomePage.css';
-
-function todayIso(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
-}
 
 const percentage = (score: number): string => `${Math.round(score * 100)}%`;
 
 /** Home page: the lost-item photo search. Found items are never browsable. */
 export default function HomePage() {
   const { user } = useAuth();
-  const [values, setValues] = useState<LostReportFormValues>({
-    ...emptyLostReportValues,
-    dateLost: todayIso(),
-  });
+  const [values, setValues] = useState<LostReportFormValues>({ ...emptyLostReportValues });
   const [files, setFiles] = useState<File[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -65,9 +54,6 @@ export default function HomePage() {
     try {
       const form = new FormData();
       form.append('title', check.data.title);
-      form.append('description', check.data.description);
-      form.append('category', check.data.category);
-      form.append('dateLost', check.data.dateLost);
       for (const file of files) form.append('images', file);
       const created = await createLostReport(form);
       setReport(created);
@@ -112,8 +98,8 @@ export default function HomePage() {
       <section className="home-page__hero">
         <h1>Lost something? Search for it with a photo.</h1>
         <p className="muted">
-          Upload a photo of your lost item (or something that looks close), tell us what it is, and
-          we will show you every found item that looks like it. Found items are hidden from
+          Upload a photo of your lost item (or something that looks close), give it a short title,
+          and we will show you every found item that looks like it. Found items are hidden from
           everyone until a search matches them.
         </p>
       </section>
@@ -151,13 +137,10 @@ export default function HomePage() {
                   item={{
                     id: match.itemId,
                     title: match.title,
-                    description: '',
-                    category: match.category,
                     images: [{ url: match.image ?? '' }],
-                    dateFound: match.dateFound,
                     status: match.status,
-                    createdAt: match.dateFound,
-                    updatedAt: match.dateFound,
+                    createdAt: '',
+                    updatedAt: '',
                     owner: { id: '', username: '' },
                   }}
                   actions={
@@ -167,7 +150,7 @@ export default function HomePage() {
                         title={
                           match.method === 'photo'
                             ? 'Photo similarity to your lost item'
-                            : 'Matched by description'
+                            : 'Matched by title'
                         }
                       >
                         {percentage(match.score)} similar
@@ -210,77 +193,6 @@ export default function HomePage() {
                 required
               />
               {errorFor('title') ? <p className="form-error">{errorFor('title')}</p> : null}
-            </div>
-
-            <div className="form-field">
-              <label className="form-label" htmlFor="lost-description">
-                Describe it — details help the match
-              </label>
-              <textarea
-                id="lost-description"
-                className="form-control"
-                value={values.description}
-                onChange={(event) => set({ description: event.target.value })}
-                aria-invalid={Boolean(errorFor('description'))}
-                placeholder="Colour, brand, distinguishing marks, what was inside…"
-                required
-              />
-              {errorFor('description') ? (
-                <p className="form-error">{errorFor('description')}</p>
-              ) : null}
-            </div>
-
-            <div className="home-page__row">
-              <div className="form-field">
-                <label className="form-label" htmlFor="lost-category">
-                  Category
-                </label>
-                <select
-                  id="lost-category"
-                  className="form-control"
-                  value={values.category}
-                  onChange={(event) => set({ category: event.target.value })}
-                  aria-invalid={Boolean(errorFor('category'))}
-                  required
-                >
-                  <option value="">Choose a category…</option>
-                  {(
-                    [
-                      'ELECTRONICS',
-                      'DOCUMENTS',
-                      'KEYS',
-                      'BAGS',
-                      'ACCESSORIES',
-                      'CLOTHING',
-                      'JEWELRY',
-                      'PETS',
-                      'OTHER',
-                    ] as const
-                  ).map((category) => (
-                    <option key={category} value={category}>
-                      {categoryLabel(category)}
-                    </option>
-                  ))}
-                </select>
-                {errorFor('category') ? <p className="form-error">{errorFor('category')}</p> : null}
-              </div>
-
-              <div className="form-field">
-                <label className="form-label" htmlFor="lost-date">
-                  Date lost
-                </label>
-                <input
-                  id="lost-date"
-                  className="form-control"
-                  type="date"
-                  value={values.dateLost}
-                  max={todayIso()}
-                  onChange={(event) => set({ dateLost: event.target.value })}
-                  aria-invalid={Boolean(errorFor('dateLost'))}
-                  required
-                />
-                {errorFor('dateLost') ? <p className="form-error">{errorFor('dateLost')}</p> : null}
-              </div>
             </div>
 
             <ImageUploader files={files} onFilesChange={setFiles} maxImages={3} />

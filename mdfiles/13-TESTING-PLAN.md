@@ -24,7 +24,7 @@ Use a test database or isolated MongoDB test environment:
 - Duplicate pending claim rejected.
 - Only item owner can decide claim.
 - Two claims cannot both be accepted.
-- User cannot read another user's notifications.
+- User cannot read another user's claims.
 
 ### Frontend tests
 - Registration form validation.
@@ -42,8 +42,7 @@ Test the complete journey:
 3. User B registers.
 4. User B finds the listing and submits a claim.
 5. User A reviews and accepts it.
-6. User B sees the notification.
-7. User A marks the item returned.
+6. User A marks the item returned.
 
 ## Important security tests
 
@@ -53,7 +52,7 @@ Test the complete journey:
 - No user can decide a claim on an item they do not own.
 - No arbitrary role assignment through profile update.
 - No upload above size/type limits.
-- No access to another user's notifications.
+- No access to another user's claims.
 
 ## Definition of done
 

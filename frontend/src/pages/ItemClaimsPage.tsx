@@ -63,7 +63,7 @@ export default function ItemClaimsPage() {
       <div className="page-header">
         <div>
           <h1>Claims on “{item.title}”</h1>
-          <p className="muted">Found {formatDate(item.dateFound)}</p>
+          <p className="muted">Review each claim and decide whether to hand the item over.</p>
         </div>
         <div className="row">
           <Link className="btn btn-secondary btn-sm" to={`/items/${item.id}`}>

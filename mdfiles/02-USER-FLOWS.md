@@ -14,7 +14,7 @@ Sign-in follows the same pattern but verifies the password hash.
 ## Flow B: Publish a found item
 
 1. Signed-in user opens the create-listing page.
-2. Enters title, description, category, and date found.
+2. Enters a title.
 3. Selects one or more photos.
 4. Frontend checks file size/type for usability; backend performs authoritative validation.
 5. Backend uploads files to Cloudinary and stores their URLs and public IDs with the listing.
@@ -40,7 +40,6 @@ Do not expose private claimant information or internal moderation fields in publ
 3. Provides a private explanation and optional proof details.
 4. Backend validates ownership rules and duplicate pending claims.
 5. Backend creates a `PENDING` claim.
-6. Listing owner receives an in-app notification.
 
 Never require a claimant to publish serial numbers, identifying marks, or other proof publicly.
 
@@ -50,7 +49,7 @@ Never require a claimant to publish serial numbers, identifying marks, or other 
 2. Owner reviews private claim details.
 3. Owner accepts or rejects the claim.
 4. Backend checks that the current user owns the listing and the claim is still pending.
-5. Backend updates the claim and sends a notification to the claimant.
+5. Backend updates the claim.
 6. If accepted, the listing becomes `CLAIMED` or `RETURN_PENDING`, according to the chosen lifecycle.
 
 ## Flow F: Complete the return
