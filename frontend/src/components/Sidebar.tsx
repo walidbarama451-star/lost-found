@@ -1,18 +1,12 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import './Sidebar.css';
-
-const NAV_LINKS = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/lost-reports', label: 'My lost reports' },
-  { to: '/my-items', label: 'My listings' },
-  { to: '/claims', label: 'My claims' },
-];
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -24,17 +18,22 @@ export default function Sidebar() {
     }
   };
 
-  const close = () => setOpen(false);
+  const close = () => {
+    setOpen(false);
+    setAddOpen(false);
+  };
+
+  const toggleAdd = () => setAddOpen((value) => !value);
 
   return (
     <>
       {/* Mobile-only top bar that toggles the sidebar. */}
       <header className="sidebar__topbar">
-        <Link className="sidebar__brand" to="/">
+        <Link className="sidebar__brand" to="/" onClick={close}>
           <span className="sidebar__brand-mark" aria-hidden="true">
-            🔎
+            📍
           </span>
-          Lost &amp; Found
+          Found It
         </Link>
         <button
           type="button"
@@ -50,38 +49,49 @@ export default function Sidebar() {
       <aside className={`sidebar${open ? ' sidebar--open' : ''}`}>
         <Link className="sidebar__brand sidebar__brand--desktop" to="/">
           <span className="sidebar__brand-mark" aria-hidden="true">
-            🔎
+            📍
           </span>
-          Lost &amp; Found
+          Found It
         </Link>
 
+        {/* Single entry point: post a found item or search for a missed one. */}
+        <div className="sidebar__add">
+          <button
+            type="button"
+            className="sidebar__add-btn"
+            aria-expanded={addOpen}
+            aria-controls="sidebar-add-menu"
+            onClick={toggleAdd}
+          >
+            <span className="sidebar__add-icon" aria-hidden="true">
+              +
+            </span>
+            New
+          </button>
+
+          {addOpen ? (
+            <div id="sidebar-add-menu" className="sidebar__add-menu">
+              <Link className="sidebar__add-option" to="/items/new" onClick={close}>
+                📍 Post a found item
+              </Link>
+              <Link className="sidebar__add-option" to="/" onClick={close}>
+                🔎 Search for a missed one
+              </Link>
+            </div>
+          ) : null}
+        </div>
+
         <nav id="sidebar-nav" className="sidebar__nav" aria-label="Main" onClick={close}>
-          <NavLink className="sidebar__link" to="/" end>
-            Find my item
-          </NavLink>
-
-          {user ? (
+          {!user ? (
             <>
-              {NAV_LINKS.map((link) => (
-                <NavLink key={link.to} className="sidebar__link" to={link.to}>
-                  {link.label}
-                </NavLink>
-              ))}
-
-              <NavLink className="sidebar__link" to="/profile">
-                Profile
-              </NavLink>
-            </>
-          ) : (
-            <>
-              <NavLink className="sidebar__link" to="/login">
+              <Link className="sidebar__link" to="/login">
                 Sign in
-              </NavLink>
-              <Link className="btn btn-primary btn-sm sidebar__cta" to="/register">
+              </Link>
+              <Link className="sidebar__link" to="/register">
                 Create account
               </Link>
             </>
-          )}
+          ) : null}
         </nav>
 
         {user ? (

@@ -39,10 +39,12 @@ export async function updateItem(itemId: string, patch: ItemPatch): Promise<Owne
   return data.item;
 }
 
-/** Soft close (backend maps this to CLOSED). */
-export async function closeItem(itemId: string): Promise<OwnerItem> {
-  const data = await apiRequest<{ item: OwnerItem }>(`/items/${itemId}`, { method: 'DELETE' });
-  return data.item;
+/**
+ * Permanently deletes a listing. The backend also removes its images, claims,
+ * and references from other users' saved lost-report matches.
+ */
+export async function deleteItem(itemId: string): Promise<void> {
+  await apiRequest<{ deleted: true }>(`/items/${itemId}`, { method: 'DELETE' });
 }
 
 export async function markReturned(itemId: string): Promise<OwnerItem> {

@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+import { Item } from '../src/modules/items/item.model.js';
 import { app, createItem, registerUser, submitClaim, type TestUser } from './helpers.js';
 
 async function listItem(itemId: string, owner: TestUser) {
@@ -61,10 +62,22 @@ describe('claim submission', () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
     const { id } = await createItem(owner);
-    await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
+    await Item.updateOne({ _id: id }, { $set: { status: 'CLOSED' } });
 
     const res = await submitClaim(claimant, id);
     expect(res.status).toBe(409);
+  });
+
+  it('removes claims when their listing is permanently deleted', async () => {
+    const owner = await registerUser();
+    const claimant = await registerUser({ email: 'claimant@example.com' });
+    const { id } = await createItem(owner);
+    expect((await submitClaim(claimant, id)).status).toBe(201);
+
+    await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
+
+    const mine = await request(app).get('/api/claims/mine').set('Cookie', claimant.cookie);
+    expect(mine.body.data.items).toHaveLength(0);
   });
 
   it('requires authentication', async () => {

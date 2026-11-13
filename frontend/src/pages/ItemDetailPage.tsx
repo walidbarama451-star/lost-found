@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ClaimForm from '../components/ClaimForm';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ErrorState from '../components/ErrorState';
@@ -11,16 +11,17 @@ import { toDisplayError } from '../lib/validation';
 import { useAuth } from '../features/auth/AuthContext';
 import { useApi } from '../lib/useApi';
 import {
-  closeItem,
+  deleteItem,
   getItem,
   markReturned,
 } from '../features/items/itemsService';
 import './ItemDetailPage.css';
 
-type PendingAction = 'close' | 'return' | null;
+type PendingAction = 'delete' | 'return' | null;
 
 export default function ItemDetailPage() {
   const { itemId = '' } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeImage, setActiveImage] = useState(0);
   const [pending, setPending] = useState<PendingAction>(null);
@@ -31,13 +32,14 @@ export default function ItemDetailPage() {
 
   const isOwner = Boolean(user && item && item.owner.id === user.id);
 
-  const runAction = async (action: () => Promise<unknown>) => {
+  const runAction = async (action: () => Promise<unknown>, onSuccess?: () => void) => {
     setBusy(true);
     setActionError(null);
     try {
       await action();
       setPending(null);
-      reload();
+      if (onSuccess) onSuccess();
+      else reload();
     } catch (err) {
       setActionError(toDisplayError(err).message);
       setPending(null);
@@ -146,16 +148,14 @@ export default function ItemDetailPage() {
                     Mark as returned
                   </button>
                 ) : null}
-                {item.status !== 'CLOSED' && item.status !== 'RETURNED' ? (
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm"
-                    onClick={() => setPending('close')}
-                    disabled={busy}
-                  >
-                    Close listing
-                  </button>
-                ) : null}
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={() => setPending('delete')}
+                  disabled={busy}
+                >
+                  Delete listing
+                </button>
               </div>
             </div>
           ) : null}
@@ -175,13 +175,15 @@ export default function ItemDetailPage() {
       ) : null}
 
       <ConfirmDialog
-        open={pending === 'close'}
-        title="Close this listing?"
-        message="The listing is removed from public search. You can’t reopen it, but claims history is kept."
-        confirmLabel="Close listing"
+        open={pending === 'delete'}
+        title="Delete this listing?"
+        message="This permanently deletes the listing and its claims. It also disappears from everyone’s saved search matches, and can’t be restored."
+        confirmLabel="Delete listing"
         danger
         busy={busy}
-        onConfirm={() => void runAction(() => closeItem(item.id))}
+        onConfirm={() =>
+          void runAction(() => deleteItem(item.id), () => navigate('/my-items'))
+        }
         onCancel={() => setPending(null)}
       />
 

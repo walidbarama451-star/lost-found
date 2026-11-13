@@ -73,15 +73,17 @@ describe('visibility and access control', () => {
     expect(detail.body.message).toBe('Listing not found');
   });
 
-  it('hides closed listings from everyone except their owner', async () => {
+  it('permanently removes a deleted listing from the owner list and detail', async () => {
     const owner = await registerUser();
     const { id } = await createItem(owner);
 
     await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
 
     const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
-    expect(mine.body.data.items).toHaveLength(1);
-    expect(mine.body.data.items[0].status).toBe('CLOSED');
+    expect(mine.body.data.items).toHaveLength(0);
+
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
+    expect(detail.status).toBe(404);
   });
 
   it('returns a 404 for a missing listing and 400 for a malformed id', async () => {
@@ -141,13 +143,16 @@ describe('editing and closing listings', () => {
     expect(detail.body.data.item.status).toBe('ACTIVE');
   });
 
-  it('soft-closes the owner listing on delete', async () => {
+  it('permanently deletes the owner listing', async () => {
     const owner = await registerUser();
     const { id } = await createItem(owner);
 
     const res = await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
     expect(res.status).toBe(200);
-    expect(res.body.data.item.status).toBe('CLOSED');
+    expect(res.body.data).toEqual({ deleted: true });
+
+    const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
+    expect(detail.status).toBe(404);
   });
 
   it('requires authentication for mutations', async () => {

@@ -6,7 +6,7 @@ import ErrorState from '../components/ErrorState';
 import ItemGrid from '../components/ItemGrid';
 import LoadingState from '../components/LoadingState';
 import Pagination from '../components/Pagination';
-import { closeItem, listMyItems, markReturned } from '../features/items/itemsService';
+import { deleteItem, listMyItems, markReturned } from '../features/items/itemsService';
 import { itemStatusLabel } from '../lib/format';
 import { toDisplayError } from '../lib/validation';
 import { useApi } from '../lib/useApi';
@@ -14,7 +14,7 @@ import { ITEM_STATUSES, type ItemStatus, type OwnerItem, type PublicItem } from 
 import './MyItemsPage.css';
 
 type PendingAction =
-  | { kind: 'close'; item: OwnerItem }
+  | { kind: 'delete'; item: OwnerItem }
   | { kind: 'return'; item: OwnerItem }
   | null;
 
@@ -40,7 +40,7 @@ export default function MyItemsPage() {
     setBusy(true);
     setActionError(null);
     try {
-      if (pending.kind === 'close') await closeItem(pending.item.id);
+      if (pending.kind === 'delete') await deleteItem(pending.item.id);
       else await markReturned(pending.item.id);
       setPending(null);
       reload();
@@ -70,24 +70,22 @@ export default function MyItemsPage() {
             Mark returned
           </button>
         ) : null}
-        {item.status !== 'CLOSED' && item.status !== 'RETURNED' ? (
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => setPending({ kind: 'close', item: owner })}
-          >
-            Close
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className="btn btn-danger btn-sm"
+          onClick={() => setPending({ kind: 'delete', item: owner })}
+        >
+          Delete
+        </button>
       </div>
     );
   };
 
-  const dialogTitle = pending?.kind === 'close' ? 'Close this listing?' : 'Mark as returned?';
+  const dialogTitle = pending?.kind === 'delete' ? 'Delete this listing?' : 'Mark as returned?';
   const dialogMessage = !pending
     ? ''
-    : pending.kind === 'close'
-      ? `“${pending.item.title}” will stop appearing in search. You can’t undo this here.`
+    : pending.kind === 'delete'
+      ? `“${pending.item.title}” will be permanently deleted. It will disappear from your listings and from everyone’s saved search matches. This can’t be undone.`
       : `Confirm that “${pending.item.title}” has been handed back to its owner.`;
 
   return (
@@ -159,8 +157,8 @@ export default function MyItemsPage() {
         open={pending !== null}
         title={dialogTitle}
         message={dialogMessage}
-        confirmLabel={pending?.kind === 'close' ? 'Close listing' : 'Mark returned'}
-        danger={pending?.kind === 'close'}
+        confirmLabel={pending?.kind === 'delete' ? 'Delete listing' : 'Mark returned'}
+        danger={pending?.kind === 'delete'}
         busy={busy}
         onConfirm={() => void runAction()}
         onCancel={() => setPending(null)}

@@ -4,8 +4,9 @@ import { embedImage } from '../../config/imageEmbedding.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
 import { LostReport } from '../lostReports/lostReport.model.js';
+import { Claim } from '../claims/claim.model.js';
 import { asPopulated, toOwnerItem, toPublicItem, type ItemDto } from './item.dto.js';
-import { Item, type ItemDoc, type ItemRecord, type ItemStatus } from './item.model.js';
+import { Item, type ItemDoc, type ItemRecord } from './item.model.js';
 import type { CreateItemInput, MyItemsQuery, UpdateItemInput } from './item.schema.js';
 
 interface ItemListResult {
@@ -135,18 +136,25 @@ export async function updateItem(itemId: string, userId: string, patch: UpdateIt
   return toOwnerItem(asPopulated(doc));
 }
 
-export async function closeItem(itemId: string, userId: string): Promise<ItemDto> {
-  const existing = await Item.findById(itemId);
-  if (!existing) throw AppError.notFound('Listing not found');
-  if (existing.createdBy.toString() !== userId)
+/**
+ * Hard-deletes the listing: the document, its Cloudinary images, any claims on
+ * it, and — importantly — every stored reference in other users' lost-report
+ * match lists, so a removed listing can never resurface in search results.
+ */
+export async function deleteItem(itemId: string, userId: string): Promise<void> {
+  const doc = await Item.findOneAndDelete({ _id: itemId, createdBy: userId });
+  if (!doc) {
+    const existing = await Item.findById(itemId);
+    if (!existing) throw AppError.notFound('Listing not found');
     throw AppError.forbidden('You can only manage your own listings');
-  if (existing.status === 'RETURNED') throw AppError.conflict('A returned listing cannot be closed');
-  if (existing.status !== 'CLOSED') {
-    existing.status = 'CLOSED';
-    await existing.save();
   }
-  await existing.populate('createdBy', 'username');
-  return toOwnerItem(asPopulated(existing));
+
+  await Promise.all([
+    LostReport.updateMany({ 'matches.item': doc._id }, { $pull: { matches: { item: doc._id } } }),
+    Claim.deleteMany({ item: doc._id }),
+  ]);
+
+  await Promise.all(doc.images.map((image) => deleteImage(image.publicId)));
 }
 
 export async function markReturned(itemId: string, userId: string): Promise<ItemDto> {

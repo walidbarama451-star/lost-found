@@ -24,7 +24,12 @@ Server must:
 
 ## Delete listing
 
-Prefer soft-close (`CLOSED`) for listings that have claims or a return history. A hard delete can be considered only when no related records exist and retention rules permit it.
+Deleting a listing is permanent. Only the owner may delete it. The server must:
+
+- Delete the listing document and its stored images.
+- Delete claims attached to the listing.
+- Remove every reference to the listing from other users' saved lost-report matches, so it can never reappear in search results.
+- Return `404` for any later request for the deleted listing.
 
 ## Listing response
 

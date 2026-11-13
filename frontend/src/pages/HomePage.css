@@ -66,13 +66,13 @@
 }
 
 .home-page__score--photo {
-  background: rgba(47, 133, 90, 0.12);
-  color: #276749;
+  background: var(--status-success-bg);
+  color: var(--status-success);
 }
 
 .home-page__score--text {
-  background: rgba(49, 100, 179, 0.12);
-  color: #2a4d7f;
+  background: var(--status-info-bg);
+  color: var(--status-info);
 }
 
 @media (max-width: 640px) {

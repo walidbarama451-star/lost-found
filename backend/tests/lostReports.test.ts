@@ -176,6 +176,34 @@ describe('lost report search lifecycle', () => {
     expect(rerun.body.data.report.lastSearchedAt).toBeTruthy();
   });
 
+  it('drops a deleted found item from saved matches and never brings it back', async () => {
+    const finder = await registerUser({ email: 'finder@example.com' });
+    const searcher = await registerUser({ email: 'searcher@example.com' });
+
+    const vector = [0.7, 0.7, 0.1, 0.1];
+    state.vectors.set(pngBuffer().length, vector);
+    const { id: itemId } = await createItem(finder);
+    state.vectors.set(pngBuffer(96).length, vector);
+
+    const created = await createLostReport(searcher);
+    const reportId = created.body.data.report.id as string;
+    expect(created.body.data.report.matches).toHaveLength(1);
+
+    const removed = await request(app).delete(`/api/items/${itemId}`).set('Cookie', finder.cookie);
+    expect(removed.status).toBe(200);
+
+    const after = await request(app)
+      .get(`/api/lost-reports/${reportId}`)
+      .set('Cookie', searcher.cookie);
+    expect(after.body.data.report.matches).toHaveLength(0);
+
+    // Re-running the search must not resurrect the deleted listing.
+    const rerun = await request(app)
+      .post(`/api/lost-reports/${reportId}/search`)
+      .set('Cookie', searcher.cookie);
+    expect(rerun.body.data.report.matches).toHaveLength(0);
+  });
+
   it('keeps reports private between users', async () => {
     const searcher = await registerUser({ email: 'searcher@example.com' });
     const other = await registerUser({ email: 'other@example.com' });

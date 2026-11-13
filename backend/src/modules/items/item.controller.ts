@@ -5,7 +5,7 @@ import { ok } from '../../shared/utils/response.js';
 import type { CreateItemInput, MyItemsQuery, UpdateItemInput } from './item.schema.js';
 import {
   addImages,
-  closeItem,
+  deleteItem as deleteItemService,
   createItem,
   getVisibleItem,
   listMyItems,
@@ -50,8 +50,8 @@ export const patchItem = asyncHandler(async (req: Request, res: Response) => {
 
 export const deleteItem = asyncHandler(async (req: Request, res: Response) => {
   const userId = requireUser(req);
-  const item = await closeItem(req.params.itemId as string, userId);
-  ok(res, { item }, 'Listing closed');
+  await deleteItemService(req.params.itemId as string, userId);
+  ok(res, { deleted: true }, 'Listing deleted');
 });
 
 export const patchReturn = asyncHandler(async (req: Request, res: Response) => {

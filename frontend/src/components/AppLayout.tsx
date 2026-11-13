@@ -14,7 +14,7 @@ export default function AppLayout() {
         <footer className="app-layout__footer">
           <div className="app-container">
             <p>
-              Lost &amp; Found — helping reunite people with their belongings. Keep proof details
+              Found It — helping reunite people with their belongings. Keep proof details
               private until a claim is accepted.
             </p>
           </div>

@@ -34,7 +34,7 @@
   height: 5.5rem;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid #d6dbd8;
+  border: 1px solid var(--color-border);
   background: var(--surface-muted);
 }
 
@@ -55,8 +55,8 @@
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: rgba(22, 33, 31, 0.75);
-  color: #fff;
+  background: oklch(20% 0.13 272 / 0.75);
+  color: var(--text-on-primary);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;

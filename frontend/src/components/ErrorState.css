@@ -4,7 +4,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-5) var(--space-4);
-  border: 1px solid #f0c4cc;
+  border: 1px solid color-mix(in oklab, var(--status-danger) 30%, transparent);
   background: var(--status-danger-bg);
   border-radius: var(--radius-md);
   text-align: center;

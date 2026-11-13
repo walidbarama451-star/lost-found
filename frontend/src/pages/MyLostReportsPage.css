@@ -46,7 +46,7 @@
   height: 96px;
   object-fit: cover;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border);
 }
 
 .lost-reports__last-search {
@@ -68,11 +68,11 @@
 }
 
 .lost-reports__score--photo {
-  background: rgba(47, 133, 90, 0.12);
-  color: #276749;
+  background: var(--status-success-bg);
+  color: var(--status-success);
 }
 
 .lost-reports__score--text {
-  background: rgba(49, 100, 179, 0.12);
-  color: #2a4d7f;
+  background: var(--status-info-bg);
+  color: var(--status-info);
 }

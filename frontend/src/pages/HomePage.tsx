@@ -74,7 +74,7 @@ export default function HomePage() {
         <section className="home-page__hero">
           <h1>Lost something? Search for it with a photo.</h1>
           <p className="muted">
-            Found items stay private on Lost &amp; Found. Sign in, describe your lost belonging and
+            Found items stay private on Found It. Sign in, describe your lost belonging and
             upload a photo of it (or something that looks close) — we will show you any found item
             that matches, so you can check whether it is yours.
           </p>

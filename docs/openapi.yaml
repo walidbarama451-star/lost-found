@@ -324,12 +324,16 @@ paths:
         '404': { description: Not found }
     delete:
       tags: [items]
-      summary: Soft-close own listing (status CLOSED)
+      summary: Permanently delete own listing
+      description: >-
+        Deletes the listing, its images, and its claims, and removes every
+        reference to it from saved lost-report matches. A deleted listing can
+        never appear in search results again.
       security: [{ sessionCookie: [] }]
       responses:
-        '200': { description: Listing closed }
+        '200': { description: Listing permanently deleted }
         '403': { description: Not the owner }
-        '409': { description: Returned listing cannot be closed }
+        '404': { description: Not found }
 
   /items/{itemId}/return:
     parameters:

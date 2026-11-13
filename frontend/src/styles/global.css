@@ -56,11 +56,13 @@ h2,
 h3,
 h4 {
   line-height: 1.25;
+  letter-spacing: -0.025em;
   color: var(--text-strong);
 }
 
 h1 {
   font-size: var(--font-size-2xl);
+  font-weight: 800;
 }
 
 h2 {
@@ -147,7 +149,7 @@ a:hover {
 .form-control {
   width: 100%;
   padding: 0.55rem 0.75rem;
-  border: 1px solid #c4ccc9;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   color: var(--text-strong);
@@ -155,7 +157,7 @@ a:hover {
 }
 
 .form-control:hover {
-  border-color: #9aa5a1;
+  border-color: var(--color-border-strong);
 }
 
 .form-control:focus-visible {
@@ -214,7 +216,7 @@ select.form-control {
 
 .btn-secondary {
   background: var(--surface-card);
-  border-color: #c4ccc9;
+  border-color: var(--color-border);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -223,11 +225,11 @@ select.form-control {
 
 .btn-danger {
   background: var(--status-danger);
-  color: #fff;
+  color: var(--text-on-primary);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #8a1c31;
+  background: var(--status-danger-strong);
 }
 
 .btn-ghost {
@@ -252,9 +254,9 @@ select.form-control {
 
 .card {
   background: var(--surface-card);
-  border: 1px solid #e2e6e3;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
 .stack {
@@ -293,11 +295,11 @@ select.form-control {
 .inline-alert-error {
   background: var(--status-danger-bg);
   color: var(--status-danger);
-  border: 1px solid #f0c4cc;
+  border: 1px solid color-mix(in oklab, var(--status-danger) 30%, transparent);
 }
 
 .inline-alert-success {
   background: var(--status-success-bg);
   color: var(--status-success);
-  border: 1px solid #bfe3cd;
+  border: 1px solid color-mix(in oklab, var(--status-success) 30%, transparent);
 }

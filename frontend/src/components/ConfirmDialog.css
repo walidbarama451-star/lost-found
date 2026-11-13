@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: rgba(22, 33, 31, 0.55);
+  background: oklch(20% 0.13 272 / 0.55);
 }
 
 .confirm-dialog {

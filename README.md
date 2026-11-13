@@ -16,7 +16,7 @@ Without an `HF_TOKEN` configured, matching gracefully falls back to title-wordin
 ## Features (MVP)
 
 - **Accounts** — register, sign in, sign out, and edit your profile. Passwords are bcrypt-hashed and never leave the server; sessions live in an **HttpOnly cookie** (no tokens in JavaScript).
-- **Listings** — publish a found item with 1–5 photos and a title. Owners edit or soft-close only their own listings.
+- **Listings** — publish a found item with 1–5 photos and a title. Owners edit or permanently delete only their own listings; deleting also removes the listing from saved search matches so it can never resurface.
 - **Lost reports & photo search** — signed-in users create photo-based searches for their lost items; matches are stored on the report and can be refreshed any time (`POST /lost-reports/:id/search`) to catch newly published found items.
 - **Claims** — a signed-in user privately explains why an item is theirs. The message is visible only to the claimant and the listing owner. Owners accept or reject; acceptance is an **atomic, race-safe state transition** (exactly one accepted claim per listing).
 - **Recovery flow** — accepted claim → listing `CLAIMED` → owner marks `RETURNED`.
