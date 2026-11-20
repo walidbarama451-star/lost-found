@@ -1,8 +1,3 @@
-/**
- * Register form validation (spec 11): username ≥ 3, valid email,
- * password ≥ 8 — errors render and the submit is blocked (no API call).
- */
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -26,14 +21,12 @@ function jsonResponse(body: unknown, status = 200): Response {
   } as Response;
 }
 
-/** Stubs global fetch; every request URL is recorded on the returned mock. */
 function stubFetch(handler: (url: string) => Response) {
   const mock = vi.fn(async (input: unknown) => handler(String(input)));
   vi.stubGlobal('fetch', mock);
   return mock;
 }
 
-/** Session bootstrap: guest (401) unless the test overrides it. */
 function guestBootstrap(url: string): Response | null {
   if (url.includes('/auth/me')) {
     return jsonResponse({ success: false, message: 'Not authenticated', errors: [] }, 401);
@@ -68,7 +61,6 @@ describe('RegisterPage validation', () => {
     await user.type(screen.getByLabelText('Password'), 'short');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
 
-    // Field-level errors render (mirror of the backend rules).
     expect(
       await screen.findByText('Username must be at least 3 characters', {
         selector: '#register-username-error',
@@ -90,7 +82,6 @@ describe('RegisterPage validation', () => {
       }),
     ).toBeInTheDocument();
 
-    // Submit blocked: no register request ever leaves the client.
     const didRegister = fetchMock.mock.calls.some(([url]) =>
       String(url).includes('/auth/register'),
     );

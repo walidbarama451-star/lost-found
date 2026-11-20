@@ -1,47 +1,48 @@
 :root {
-  /* Brand — Lovable blue (primary) + soft tint */
-  --color-primary: oklch(58% 0.22 259);
-  --color-primary-strong: oklch(50% 0.21 262);
-  --color-primary-soft: oklch(94% 0.03 259);
-  --color-accent: oklch(91% 0.045 275);
+  --color-primary: oklch(20% 0.005 80);
+  --color-primary-strong: oklch(12% 0.005 80);
+  --color-primary-soft: oklch(96% 0.012 85);
+  --color-accent: oklch(52% 0.23 262);
+  --color-accent-soft: oklch(95% 0.03 262);
+  --color-violet: oklch(56% 0.25 295);
 
-  /* Borders */
-  --color-border: oklch(90% 0.03 275);
-  --color-border-strong: oklch(80% 0.035 275);
+  --gradient-blue: #5384fd;
+  --gradient-pink: #fb74d3;
+  --gradient-red: #fd4f48;
+  --gradient-orange: #ff6920;
 
-  /* Surfaces */
-  --surface-bg: oklch(98.5% 0.008 275);
+  --color-border: oklch(90% 0.014 85);
+  --color-border-strong: oklch(83% 0.02 85);
+
+  --surface-bg: oklch(96.5% 0.008 85);
+  --surface-canvas: oklch(98.8% 0.006 85);
   --surface-card: oklch(100% 0 0);
-  --surface-muted: oklch(95% 0.02 275);
-  --surface-inverse: oklch(20% 0.13 272);
+  --surface-muted: oklch(96% 0.012 85);
+  --surface-inverse: oklch(20% 0.005 80);
 
-  /* Sidebar rail (Lovable navy) */
-  --color-sidebar: oklch(20% 0.13 272);
-  --color-sidebar-foreground: oklch(90% 0.03 275);
-  --color-sidebar-accent: oklch(28% 0.14 272);
-  --color-sidebar-border: oklch(30% 0.12 272);
+  --color-nav: oklch(96.5% 0.008 85);
+  --color-nav-foreground: oklch(38% 0.01 80);
+  --color-nav-accent: oklch(93% 0.012 85);
+  --color-nav-border: oklch(90% 0.012 85);
 
-  /* Text */
-  --text-strong: oklch(20% 0.13 272);
-  --text-body: oklch(28% 0.1 272);
-  --text-muted: oklch(50% 0.06 272);
-  --text-inverse: oklch(98.5% 0.008 275);
+  --text-strong: oklch(20% 0.005 80);
+  --text-body: oklch(38% 0.01 80);
+  --text-muted: oklch(55% 0.012 80);
+  --text-inverse: oklch(98% 0.005 85);
   --text-on-primary: oklch(99% 0 0);
 
-  /* Status */
-  --status-success: oklch(60% 0.15 155);
-  --status-success-bg: oklch(96% 0.03 155);
-  --status-warning: oklch(60% 0.13 75);
-  --status-warning-bg: oklch(96% 0.05 85);
-  --status-danger: oklch(58% 0.24 27);
-  --status-danger-strong: oklch(48% 0.2 27);
-  --status-danger-bg: oklch(95% 0.04 27);
-  --status-info: oklch(55% 0.19 262);
-  --status-info-bg: oklch(95% 0.02 259);
-  --status-neutral: oklch(50% 0.06 272);
-  --status-neutral-bg: oklch(94% 0.03 275);
+  --status-success: oklch(48% 0.12 155);
+  --status-success-bg: oklch(95.5% 0.03 155);
+  --status-warning: oklch(52% 0.12 75);
+  --status-warning-bg: oklch(96% 0.045 85);
+  --status-danger: oklch(52% 0.2 27);
+  --status-danger-strong: oklch(43% 0.18 27);
+  --status-danger-bg: oklch(96% 0.03 27);
+  --status-info: oklch(50% 0.18 262);
+  --status-info-bg: oklch(95.5% 0.025 262);
+  --status-neutral: oklch(50% 0.012 80);
+  --status-neutral-bg: oklch(95% 0.012 85);
 
-  /* Spacing scale */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -50,24 +51,21 @@
   --space-6: 2rem;
   --space-7: 3rem;
 
-  /* Radii — base 0.9rem like the Lovable theme */
-  --radius-sm: 0.65rem;
-  --radius-md: 0.775rem;
-  --radius-lg: 1.4rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
   --radius-pill: 999px;
 
-  /* Shadows — navy-tinted, plus the Lovable blue card glow */
-  --shadow-sm: 0 1px 2px oklch(20% 0.13 272 / 0.06);
-  --shadow-md: 0 4px 14px oklch(20% 0.13 272 / 0.08);
-  --shadow-lg: 0 12px 32px oklch(20% 0.13 272 / 0.14);
-  --shadow-card: 0 10px 30px -14px oklch(58% 0.22 259 / 0.35);
+  --shadow-sm: 0 1px 2px oklch(20% 0.005 80 / 0.04);
+  --shadow-md: 0 10px 30px -20px oklch(20% 0.005 80 / 0.18);
+  --shadow-lg: 0 28px 70px -28px oklch(20% 0.005 80 / 0.28);
+  --shadow-card: 0 1px 0 oklch(20% 0.005 80 / 0.03), 0 16px 40px -32px oklch(20% 0.005 80 / 0.22);
 
-  /* Layout */
-  --container-width: 72rem;
-  --sidebar-width: 15rem;
+  --container-width: 76rem;
+  --main-pad: clamp(1.25rem, 3vw, 2.5rem);
 
-  /* Type — Plus Jakarta Sans (loaded in index.html) */
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;

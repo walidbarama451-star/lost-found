@@ -16,19 +16,14 @@ export interface ExistingImage {
 
 interface ItemFormProps {
   initialValues?: ItemFormValues;
-  /** Edit mode extras: images already stored on the listing. */
   existingImages?: ExistingImage[];
   onRemoveImage?: (publicId: string) => Promise<void>;
   submitLabel: string;
   onSubmit: (values: ItemFormValues, files: File[]) => Promise<void>;
-  /** Extra controls rendered next to the submit button (e.g. Cancel). */
   footer?: ReactNode;
 }
 
-/**
- * Create/edit listing form. Field-level Zod errors mirror the backend rules;
- * API errors surface both a form message and per-field messages.
- */export default function ItemForm({
+export default function ItemForm({
   initialValues,
   existingImages,
   onRemoveImage,
@@ -46,7 +41,6 @@ interface ItemFormProps {
 
   const set = (patch: Partial<ItemFormValues>) => {
     setValues((prev) => ({ ...prev, ...patch }));
-    // Clear the field's error as the user edits it.
     const touched = Object.keys(patch)[0];
     if (touched && fieldErrors[touched]) {
       setFieldErrors((prev) => {
@@ -68,7 +62,6 @@ interface ItemFormProps {
       return;
     }
 
-    // Client pre-check: creating a listing needs at least one photo.
     if (!isEdit && files.length === 0) {
       setFormError('Select at least one photo.');
       return;

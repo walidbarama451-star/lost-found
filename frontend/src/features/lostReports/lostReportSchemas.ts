@@ -1,5 +1,3 @@
-/** Client-side lost-report validation mirroring the backend rules. */
-
 import { z } from 'zod';
 
 export const lostReportSchema = z.object({

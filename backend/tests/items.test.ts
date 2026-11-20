@@ -44,7 +44,6 @@ describe('visibility and access control', () => {
     const owner = await registerUser({ email: 'owner@example.com' });
     await createItem(owner);
 
-    // The route is gone entirely — nothing is browsable by anyone.
     const listed = await request(app).get('/api/items');
     expect(listed.status).toBe(404);
     expect(listed.body.data).toBeUndefined();
@@ -57,7 +56,6 @@ describe('visibility and access control', () => {
     const detail = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
     expect(detail.status).toBe(200);
     expect(detail.body.data.item.id).toBe(id);
-    // Owner payload must not leak contact details or password hashes.
     const raw = JSON.stringify(detail.body);
     expect(raw).not.toContain('owner@example.com');
     expect(raw).not.toContain('passwordHash');

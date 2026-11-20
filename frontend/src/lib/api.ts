@@ -1,11 +1,3 @@
-/**
- * Single shared HTTP client for the Lost & Found API.
- *
- * Auth strategy: HttpOnly cookie — every request sends `credentials: 'include'`
- * and no token ever exists in JavaScript. A registered 401 handler clears the
- * current user and redirects to /login (spec 11).
- */
-
 const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api';
 
 export interface ApiFieldError {
@@ -24,7 +16,6 @@ export class ApiError extends Error {
     this.fields = fields;
   }
 
-  /** Field errors keyed by field name (first message wins). */
   fieldErrors(): Record<string, string> {
     const result: Record<string, string> = {};
     for (const entry of this.fields) {
@@ -48,7 +39,6 @@ interface ErrorEnvelope {
   errors?: ApiFieldError[];
 }
 
-/** Registered by the auth layer: clears the user and routes to /login. */
 type UnauthorizedHandler = () => void;
 let unauthorizedHandler: UnauthorizedHandler | null = null;
 
@@ -58,17 +48,9 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): voi
 
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
-  /** JSON body — serialized automatically. Do not combine with `formData`. */
   body?: unknown;
-  /** Multipart body (image uploads). Server sets the boundary. */
   formData?: FormData;
-  /** Query parameters; `undefined`, `null` and `''` entries are dropped. */
   query?: Record<string, string | number | undefined | null>;
-  /**
-   * Skip the global 401 → /login redirect. Used by the session bootstrap
-   * (`GET /auth/me`) and by the login/register endpoints themselves, where a
-   * 401/400 is an expected, locally-handled outcome.
-   */
   skipAuthRedirect?: boolean;
 }
 
@@ -89,14 +71,13 @@ function isApiFieldError(value: unknown): value is ApiFieldError {
   return typeof candidate.field === 'string' && typeof candidate.message === 'string';
 }
 
-/** Performs an API request and unwraps the `{ success, data }` envelope. */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, formData, query, skipAuthRedirect = false } = options;
 
   const headers: Record<string, string> = {};
   let payload: BodyInit | undefined;
   if (formData) {
-    payload = formData; // browser sets multipart boundary
+    payload = formData;
   } else if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
     payload = JSON.stringify(body);
@@ -144,7 +125,6 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   throw new ApiError(response.status, 'The server returned an unexpected response.');
 }
 
-/** Prefixes API-relative image paths (`/uploads/…`) with the API origin. */
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (!url.startsWith('/')) return url;

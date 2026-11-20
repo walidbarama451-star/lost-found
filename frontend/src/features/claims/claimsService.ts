@@ -1,5 +1,3 @@
-/** Claims API calls (cookie auth). */
-
 import { apiRequest } from '../../lib/api';
 import type { ClaimOnItem, MyClaim, Paginated } from '../../types';
 
@@ -15,7 +13,6 @@ export async function listMyClaims(page = 1, limit = 12): Promise<Paginated<MyCl
   return apiRequest<Paginated<MyClaim>>('/claims/mine', { query: { page, limit } });
 }
 
-/** Owner-only; 403 from the backend if the caller does not own the listing. */
 export async function listClaimsOnItem(
   itemId: string,
   page = 1,

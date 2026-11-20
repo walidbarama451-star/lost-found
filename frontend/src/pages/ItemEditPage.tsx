@@ -26,7 +26,6 @@ function toFormValues(item: OwnerItem): ItemFormValues {
   };
 }
 
-/** PATCH body: only fields the schema accepts. */
 function buildPatch(values: ItemFormValues) {
   return {
     title: values.title,
@@ -49,7 +48,6 @@ export default function ItemEditPage() {
 
   const { item, canManageImages } = data;
 
-  // Backend enforces ownership too — this is a UX shortcut only.
   if (user && item.owner.id !== user.id) {
     return (
       <ErrorState
@@ -71,7 +69,6 @@ export default function ItemEditPage() {
   };
 
   const handleRemoveImage = async (publicId: string) => {
-    // Errors are surfaced by ItemForm; success refreshes the owner payload.
     await removeImage(itemId, publicId);
     reload();
   };

@@ -1,5 +1,3 @@
-/** Client-side auth validation mirroring backend rules (auth.schema.ts). */
-
 import { z } from 'zod';
 
 export const registerSchema = z.object({

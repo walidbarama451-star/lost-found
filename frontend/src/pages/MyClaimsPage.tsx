@@ -87,7 +87,7 @@ export default function MyClaimsPage() {
                   {claim.status === 'PENDING' ? (
                     <button
                       type="button"
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-secondary btn-sm"
                       onClick={() => setPending(claim)}
                     >
                       Withdraw claim

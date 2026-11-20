@@ -5,7 +5,6 @@ export interface UserRecord {
   username: string;
   discordUsername?: string;
   email: string;
-  /** Never returned by any API response. */
   passwordHash: string;
   phone?: string;
   role: 'USER' | 'ADMIN';
@@ -27,7 +26,6 @@ const userSchema = new Schema<UserRecord>(
 
 export type UserDoc = HydratedDocument<UserRecord>;
 
-/** Public-safe projection of the user collection. */
 export interface SafeUser {
   id: string;
   username: string;
@@ -37,7 +35,6 @@ export interface SafeUser {
   createdAt: Date;
 }
 
-/** Maps a user document to the shape allowed in API responses. */
 export function toSafeUser(user: UserDoc): SafeUser {
   const safe: SafeUser = {
     id: user._id.toString(),
@@ -50,7 +47,6 @@ export function toSafeUser(user: UserDoc): SafeUser {
   return safe;
 }
 
-/** What a signed-in user may learn about another account (no email/phone). */
 export interface PublicUser {
   id: string;
   username: string;
@@ -58,7 +54,6 @@ export interface PublicUser {
   createdAt: Date;
 }
 
-/** Maps a user document to the shape other users' profile pages may show. */
 export function toPublicUser(user: UserDoc): PublicUser {
   const pub: PublicUser = {
     id: user._id.toString(),

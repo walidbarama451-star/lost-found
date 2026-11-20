@@ -14,7 +14,6 @@ interface ItemListResult {
   pagination: ReturnType<typeof buildPaginationMeta>;
 }
 
-/** Stores the uploaded files and attaches embeddings when the service is up. */
 async function storeImages(
   files: Express.Multer.File[],
 ): Promise<{ url: string; publicId: string; embedding?: number[] }[]> {
@@ -60,11 +59,6 @@ function isOwner(doc: ItemDoc, userId: string): boolean {
   return String(ownerId) === userId;
 }
 
-/**
- * Item detail is no longer public: it is visible to the owner (full DTO) and
- * to users whose lost report matched the item (public DTO). Everyone else
- * gets a 404, so item existence is never revealed to outsiders.
- */
 export async function getVisibleItem(itemId: string, userId: string): Promise<ItemDto> {
   const doc = await loadVisibleItem(itemId);
   if (!doc) throw AppError.notFound('Listing not found');
@@ -105,7 +99,6 @@ export async function createItem(
     await doc.populate('createdBy', 'username');
     return toOwnerItem(asPopulated(doc));
   } catch (error) {
-    // Listing creation failed after upload — clean up the orphaned assets.
     await Promise.all(uploaded.map((image) => deleteImage(image.publicId)));
     throw error;
   }
@@ -136,11 +129,6 @@ export async function updateItem(itemId: string, userId: string, patch: UpdateIt
   return toOwnerItem(asPopulated(doc));
 }
 
-/**
- * Hard-deletes the listing: the document, its Cloudinary images, any claims on
- * it, and — importantly — every stored reference in other users' lost-report
- * match lists, so a removed listing can never resurface in search results.
- */
 export async function deleteItem(itemId: string, userId: string): Promise<void> {
   const doc = await Item.findOneAndDelete({ _id: itemId, createdBy: userId });
   if (!doc) {

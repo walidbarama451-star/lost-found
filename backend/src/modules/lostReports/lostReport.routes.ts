@@ -19,8 +19,6 @@ import {
 
 export const lostReportsRouter = Router();
 
-// Everything below requires a signed-in user: found items are never shown
-// publicly, only to people actively searching for their lost belongings.
 lostReportsRouter.use(authenticate);
 
 lostReportsRouter.post(

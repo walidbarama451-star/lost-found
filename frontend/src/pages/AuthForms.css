@@ -1,21 +1,51 @@
 .auth-forms {
+  position: relative;
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding-block: var(--space-5);
+  min-height: calc(100vh - 4rem);
+  margin: calc(var(--main-pad) * -1);
+  padding: 3rem 1rem;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(65% 90% at 12% 5%, color-mix(in srgb, var(--gradient-blue) 46%, white), transparent 60%),
+    radial-gradient(60% 80% at 88% 10%, color-mix(in srgb, var(--gradient-pink) 42%, white), transparent 62%),
+    radial-gradient(55% 80% at 65% 100%, color-mix(in srgb, var(--gradient-red) 30%, white), transparent 62%),
+    var(--surface-canvas);
 }
 
 .auth-forms__card {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 26rem;
-  padding: var(--space-5);
+  max-width: 27rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-forms__card h1 {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  letter-spacing: -0.045em;
+}
+
+.auth-forms__card > .muted {
+  margin-top: -0.5rem;
+  font-size: 0.9rem;
 }
 
 .auth-forms__card form {
   display: flex;
   flex-direction: column;
+  margin-top: var(--space-2);
+}
+
+.auth-forms__card .btn-block {
+  margin-top: var(--space-2);
 }
 
 .auth-forms__switch {

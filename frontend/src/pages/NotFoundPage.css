@@ -4,14 +4,18 @@
   align-items: center;
   text-align: center;
   gap: var(--space-3);
-  padding: var(--space-7) var(--space-4);
+  padding: clamp(3rem, 8vw, 6rem) var(--space-4);
 }
 
 .not-found__code {
-  font-size: clamp(3rem, 12vw, 5rem);
+  font-size: clamp(4rem, 14vw, 7rem);
   font-weight: 700;
-  color: var(--color-primary);
   line-height: 1;
+  letter-spacing: -0.06em;
+  background: linear-gradient(92deg, #1f55f1 0%, #8e48ff 45%, #fd4f48 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .not-found__actions {

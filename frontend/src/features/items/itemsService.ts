@@ -1,5 +1,3 @@
-/** Item listings API calls. */
-
 import { apiRequest } from '../../lib/api';
 import type { ItemStatus, OwnerItem, Paginated, PublicItem } from '../../types';
 
@@ -18,7 +16,6 @@ export async function getItem(itemId: string): Promise<PublicItem> {
   return data.item;
 }
 
-/** Multipart create — fields as text, files under the `images` field name. */
 export async function createItem(form: FormData): Promise<OwnerItem> {
   const data = await apiRequest<{ item: OwnerItem }>('/items', {
     method: 'POST',
@@ -39,10 +36,6 @@ export async function updateItem(itemId: string, patch: ItemPatch): Promise<Owne
   return data.item;
 }
 
-/**
- * Permanently deletes a listing. The backend also removes its images, claims,
- * and references from other users' saved lost-report matches.
- */
 export async function deleteItem(itemId: string): Promise<void> {
   await apiRequest<{ deleted: true }>(`/items/${itemId}`, { method: 'DELETE' });
 }

@@ -6,7 +6,6 @@ import { User, toSafeUser } from './user.model.js';
 import type { UpdateProfileInput } from './user.schema.js';
 import { getPublicProfile, updateProfile } from './user.service.js';
 
-/** GET /api/auth/me — returns the current user's safe profile. */
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthorized();
 
@@ -16,7 +15,6 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
   ok(res, { user: toSafeUser(doc) });
 });
 
-/** PATCH /api/users/me — updates whitelisted profile fields only. */
 export const patchMe = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthorized();
 
@@ -24,7 +22,6 @@ export const patchMe = asyncHandler(async (req: Request, res: Response) => {
   ok(res, { user: updated }, 'Profile updated');
 });
 
-/** GET /api/users/:userId — another account's public profile (sign-in required). */
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthorized();
 

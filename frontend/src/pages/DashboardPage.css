@@ -1,55 +1,46 @@
-.dashboard__section {
-  margin-bottom: var(--space-6);
-}
-
-.dashboard__section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-.dashboard__section-head h2 {
-  font-size: var(--font-size-xl);
-}
-
-.dashboard__claim-list {
+.dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 
-.dashboard__claim {
+.dashboard__hero {
+  margin: calc(var(--main-pad) * -1) calc(var(--main-pad) * -1) var(--space-5);
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 70%, white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.dashboard__hero-inner {
+  max-width: 52rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.dashboard__hero h1 {
+  max-width: 44rem;
+  margin: 0.75rem auto 0;
+  font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+}
+
+.dashboard__hero p {
+  max-width: 36rem;
+  margin: 0.9rem auto 0;
+  color: var(--text-body);
+}
+
+.dashboard__hero-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.dashboard__claim-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
-.dashboard__claim-title {
-  font-weight: 600;
-  color: var(--text-strong);
-}
-
-.dashboard__claim-info .muted {
-  font-size: var(--font-size-sm);
-}
-
-.dashboard__claim-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+@media (max-width: 720px) {
+  .dashboard__hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

@@ -17,24 +17,15 @@ import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import UserProfilePage from './pages/UserProfilePage';
 
-/**
- * Application routes. The home page is the lost-item photo search — found
- * items are never browsable. `/` stays open for the sign-in prompt; the
- * search form itself requires a session. Everything else is wrapped in
- * `ProtectedRoute`. The router itself lives in `main.tsx` so tests can
- * supply a MemoryRouter.
- */
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<AppLayout />}>
-          {/* Home = lost-item search (search form itself needs a session) */}
           <Route path="/" element={<HomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected */}
           <Route
             path="/dashboard"
             element={
@@ -116,7 +107,6 @@ export default function App() {
             }
           />
 
-          {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

@@ -1,5 +1,3 @@
-/** Display formatting helpers (Intl-based, per spec 11). */
-
 import type { ClaimStatus, ItemStatus } from '../types';
 
 const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
@@ -25,7 +23,6 @@ export function claimStatusLabel(status: ClaimStatus): string {
   return CLAIM_STATUS_LABELS[status] ?? status;
 }
 
-/** Formats an ISO date string as e.g. "Oct 30, 2026". */
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) return '';
   const date = new Date(iso);
@@ -37,7 +34,6 @@ export function formatDate(iso: string | null | undefined): string {
   }).format(date);
 }
 
-/** Formats an ISO timestamp as e.g. "Oct 30, 2026, 14:05". */
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '';
   const date = new Date(iso);

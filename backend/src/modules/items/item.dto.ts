@@ -14,7 +14,6 @@ export interface ItemDto {
   createdAt: string;
   updatedAt: string;
   owner: { id: string; username: string };
-  /** Owner-scoped only. */
   acceptedClaim?: string | null;
   returnedAt?: string | null;
 }

@@ -1,5 +1,3 @@
-/** Client-side claim validation mirroring backend rules (claim.schema.ts). */
-
 import { z } from 'zod';
 
 export const claimSchema = z.object({

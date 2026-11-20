@@ -1,5 +1,3 @@
-// Runs before every test file (see vitest.config.ts setupFiles).
-// Environment must be set before any application module reads it.
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI = process.env.MONGODB_TEST_URI ?? 'mongodb://127.0.0.1:27017/lost-and-found-test';
 process.env.MONGODB_TEST_URI = process.env.MONGODB_URI;

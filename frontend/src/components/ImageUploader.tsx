@@ -2,14 +2,12 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import './ImageUploader.css';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB, matches backend
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 interface ImageUploaderProps {
   files: File[];
   onFilesChange: (files: File[]) => void;
-  /** Number of images already on the listing (edit mode). */
   existingCount?: number;
-  /** Maximum number of images (lost-item searches allow 3). */
   maxImages?: number;
   disabled?: boolean;
   error?: string | null;
@@ -20,10 +18,6 @@ interface Preview {
   url: string;
 }
 
-/**
- * Multiple-image picker with client-side pre-checks (size/type) and
- * previews. The backend remains the authoritative validator.
- */
 export default function ImageUploader({
   files,
   onFilesChange,
@@ -36,7 +30,6 @@ export default function ImageUploader({
   const [localError, setLocalError] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Preview[]>([]);
 
-  // Build object URLs for the current selection; revoke on change/unmount.
   useEffect(() => {
     const next = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
     setPreviews(next);
@@ -49,7 +42,7 @@ export default function ImageUploader({
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(event.target.files ?? []);
-    event.target.value = ''; // allow re-selecting the same file
+    event.target.value = '';
     if (chosen.length === 0) return;
 
     const rejected: string[] = [];

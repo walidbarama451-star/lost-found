@@ -1,5 +1,3 @@
-/** Client-side profile validation mirroring backend rules (user.schema.ts). */
-
 import { z } from 'zod';
 
 export const profileSchema = z

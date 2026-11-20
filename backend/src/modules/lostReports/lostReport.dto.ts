@@ -9,7 +9,6 @@ export interface LostReportMatchDto {
   title: string;
   status: string;
   image: string | null;
-  /** False when the listing was closed/claimed after being matched. */
   available: boolean;
 }
 
@@ -24,7 +23,6 @@ export interface LostReportDto {
   updatedAt: string;
 }
 
-/** Builds the report DTO. `itemDocs` enriches matches with live item data. */
 export function toLostReportDto(
   report: LostReportDoc,
   itemDocs: ItemDoc[] = [],

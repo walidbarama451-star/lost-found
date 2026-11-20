@@ -4,11 +4,9 @@ interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  /** Optional label prefix, e.g. "Listings". */
   label?: string;
 }
 
-/** Page window: first/last plus up to 5 pages around the current one. */
 function pageWindow(page: number, totalPages: number): number[] {
   const pages = new Set<number>([1, totalPages]);
   for (let p = page - 2; p <= page + 2; p += 1) {

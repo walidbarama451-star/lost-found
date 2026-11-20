@@ -134,7 +134,6 @@ describe('profile', () => {
     const user = await registerUser({ email: 'sneaky@example.com' });
     const res = await request(app).patch('/api/users/me').set('Cookie', user.cookie).send({ role: 'ADMIN' });
 
-    // Unknown fields are stripped by validation — nothing is updated.
     expect(res.status).toBe(400);
 
     const me = await request(app).get('/api/auth/me').set('Cookie', user.cookie);

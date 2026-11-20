@@ -1,5 +1,3 @@
-/** Zod helpers: turn issues into `{ field: message }` maps for forms. */
-
 import { ZodError, type ZodIssue, type ZodTypeAny } from 'zod';
 import { ApiError } from './api';
 
@@ -8,7 +6,6 @@ function issueToEntry(issue: ZodIssue): { field: string; message: string } {
   return { field, message: issue.message };
 }
 
-/** First message per field, matching the backend's `errors[]` shape. */
 export function zodFieldErrors(error: ZodError): Record<string, string> {
   const result: Record<string, string> = {};
   for (const issue of error.issues) {
@@ -24,10 +21,6 @@ export type ValidateResult<T> =
   | { ok: true; data: T }
   | { ok: false; fieldErrors: Record<string, string>; message: string };
 
-/**
- * Runs a schema and returns either parsed data or a field-error map plus a
- * form-level message, so every form shares one error-handling path.
- */
 export function validateWith<T>(
   schema: ZodTypeAny,
   input: unknown,
@@ -39,7 +32,6 @@ export function validateWith<T>(
   return { ok: false, fieldErrors, message: first ?? 'Please fix the highlighted fields.' };
 }
 
-/** Extracts `{ message, fieldErrors }` from any thrown value for display. */
 export function toDisplayError(error: unknown): {
   message: string;
   fieldErrors: Record<string, string>;

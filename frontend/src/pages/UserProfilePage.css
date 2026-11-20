@@ -1,11 +1,18 @@
 .user-profile__breadcrumb {
   margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
 }
 
 .user-profile__card {
   max-width: 560px;
   margin-inline: auto;
-  padding: var(--space-5);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(90% 80% at 10% 0%, color-mix(in srgb, var(--gradient-blue) 18%, white), transparent 65%),
+    radial-gradient(70% 70% at 100% 10%, color-mix(in srgb, var(--gradient-pink) 14%, white), transparent 65%),
+    var(--surface-card);
 }
 
 .user-profile__header {
@@ -26,14 +33,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface-muted);
-  color: var(--text-muted);
+  background: var(--color-primary);
+  color: var(--text-on-primary);
   font-size: var(--font-size-lg);
   font-weight: 600;
 }
 
 .user-profile__header h1 {
   margin-bottom: 0;
+  font-size: clamp(1.6rem, 3vw, 2rem);
 }
 
 .user-profile__self {
@@ -51,7 +59,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--surface-muted);

@@ -7,11 +7,9 @@ import './ItemCard.css';
 
 interface ItemCardProps {
   item: PublicItem;
-  /** Optional row of owner actions rendered in the card footer. */
   actions?: ReactNode;
 }
 
-/** Browse card: strong photo and clear status. */
 export default function ItemCard({ item, actions }: ItemCardProps) {
   const cover = item.images[0]?.url ?? null;
   const src = resolveImageUrl(cover);

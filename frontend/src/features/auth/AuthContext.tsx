@@ -1,10 +1,3 @@
-/**
- * Session context: current user + sign in/out.
- *
- * Auth is an HttpOnly cookie; `setUnauthorizedHandler` makes any unexpected
- * 401 clear the user and route to /login (spec 11 — graceful expiry).
- */
-
 import {
   createContext,
   useCallback,
@@ -28,7 +21,6 @@ interface AuthContextValue {
   login: (input: LoginInput) => Promise<User>;
   register: (input: RegisterInput) => Promise<User>;
   logout: () => Promise<void>;
-  /** Applies a locally-known user change (e.g. profile update). */
   updateUser: (user: User) => void;
 }
 
@@ -39,7 +31,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const navigate = useNavigate();
 
-  // Bootstrap the session from the cookie.
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -57,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Any other 401: clear the user and go to /login.
   useEffect(() => {
     setUnauthorizedHandler(() => {
       setUser(null);

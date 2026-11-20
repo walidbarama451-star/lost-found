@@ -30,10 +30,6 @@ export async function emailExists(email: string): Promise<boolean> {
   return existing !== null;
 }
 
-/**
- * Loads another account's public profile: username and Discord contact only.
- * Email and phone are never answered here — they stay private to the account.
- */
 export async function getPublicProfile(userId: string): Promise<PublicUser> {
   const oid = parseObjectId(userId, 'userId');
   const user = await User.findById(oid).select('_id username discordUsername createdAt');
@@ -41,17 +37,12 @@ export async function getPublicProfile(userId: string): Promise<PublicUser> {
   return toPublicUser(user);
 }
 
-/**
- * Updates only the whitelisted profile fields. `role`, `passwordHash` and
- * every other account flag are structurally impossible to change here.
- */
 export async function updateProfile(userId: string, patch: UpdateProfileInput): Promise<SafeUser> {
   const updates: Record<string, string> = {};
   if (patch.username !== undefined) updates.username = patch.username.trim();
   if (patch.email !== undefined) updates.email = patch.email.trim().toLowerCase();
   if (patch.phone !== undefined) updates.phone = patch.phone;
 
-  // Empty Discord username clears the field ($unset) — it is optional.
   const clearDiscord = patch.discordUsername === '';
   if (patch.discordUsername) updates.discordUsername = patch.discordUsername;
 

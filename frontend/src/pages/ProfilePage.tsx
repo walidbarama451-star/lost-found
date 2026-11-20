@@ -27,7 +27,6 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Seed the form once the session user is known.
   if (!initialized && user) {
     setInitialized(true);
     setValues({

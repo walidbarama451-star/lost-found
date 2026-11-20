@@ -18,7 +18,6 @@ afterAll(async () => {
   await disconnectDatabase();
 });
 
-/** A tiny but structurally valid PNG (magic bytes + padding). */
 export function pngBuffer(fill = 64): Buffer {
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
@@ -38,7 +37,6 @@ export interface TestUser {
   cookie: string;
 }
 
-/** Registers a user and returns their identity plus session cookie. */
 export async function registerUser(
   overrides: Partial<{ username: string; discordUsername: string; email: string; password: string }> = {},
 ): Promise<TestUser> {
@@ -62,7 +60,6 @@ export async function registerUser(
   };
 }
 
-/** Extracts the session cookie from a login/register response. */
 export function cookieOf(res: request.Response): string {
   const raw = res.headers['set-cookie'];
   const cookies: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
@@ -75,7 +72,6 @@ export interface CreateItemOverrides {
   title?: string;
 }
 
-/** Creates a listing with one PNG image as the given user. */
 export async function createItem(
   user: TestUser,
   overrides: CreateItemOverrides = {},
@@ -92,7 +88,6 @@ export async function createItem(
   return { id: res.body.data.item.id as string, body: res.body };
 }
 
-/** Submits a claim as the given user. */
 export async function submitClaim(user: TestUser, itemId: string, message?: string) {
   return request(app)
     .post('/api/claims')

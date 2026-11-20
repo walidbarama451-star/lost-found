@@ -61,22 +61,13 @@ export const env = {
   get hfEmbeddingModel(): string {
     return process.env.HF_EMBEDDING_MODEL ?? 'openai/clip-vit-base-patch32';
   },
-  /** Photo-matching is available only when an embedding API token is set. */
   get embeddingConfigured(): boolean {
     return this.hfToken.length > 0;
   },
-  /**
-   * Minimum cosine similarity (0–1) for a lost-item photo to count as a match.
-   */
   get similarityThreshold(): number {
     const value = Number(process.env.SIMILARITY_THRESHOLD ?? '0.8');
     return Number.isFinite(value) && value > 0 && value < 1 ? value : 0.8;
   },
-  /**
-   * Minimum blended text similarity (0–1) for a lost report's wording to
-   * match an item when photo vectors are unavailable. Lower than the photo
-   * threshold: wording overlap is a much weaker signal than pixel evidence.
-   */
   get textMatchThreshold(): number {
     const value = Number(process.env.TEXT_MATCH_THRESHOLD ?? '0.45');
     return Number.isFinite(value) && value > 0 && value < 1 ? value : 0.45;

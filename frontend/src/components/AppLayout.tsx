@@ -1,12 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import TopNav from './TopNav';
 import './AppLayout.css';
 
-/** Shared shell: side dashboard + routed content + footer. */
 export default function AppLayout() {
   return (
     <div className="app-layout">
-      <Sidebar />
+      <TopNav />
       <div className="app-layout__body">
         <main className="app-layout__main app-container" id="main-content">
           <Outlet />

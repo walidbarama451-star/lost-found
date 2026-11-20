@@ -102,8 +102,6 @@ describe('security and privacy', () => {
     expect(res.headers['x-request-id']).toBeTruthy();
   });
 
-  // Keep this test last: it intentionally exhausts the auth rate limiter
-  // for the remainder of this file.
   it('rate limits repeated login attempts', async () => {
     let limited = false;
     for (let attempt = 0; attempt < 110; attempt += 1) {

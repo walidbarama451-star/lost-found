@@ -23,7 +23,6 @@ export interface LostReportRecord {
   title: string;
   images: LostReportImage[];
   status: LostReportStatus;
-  /** Best matches from the last photo search, strongest first. */
   matches: LostReportMatch[];
   lastSearchedAt?: Date;
   createdAt: Date;

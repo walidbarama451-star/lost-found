@@ -22,8 +22,6 @@ import {
 
 export const itemsRouter = Router();
 
-// Found items are hidden by default: there is no public browse list. Detail
-// access is granted to the owner and to users whose lost report matched it.
 itemsRouter.get('/mine', authenticate, validate(myItemsQuerySchema, 'query'), listMine);
 itemsRouter.get('/:itemId/claims', authenticate, getItemClaims);
 itemsRouter.get('/:itemId', authenticate, getItem);

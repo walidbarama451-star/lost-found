@@ -1,5 +1,3 @@
-/** Shared API response models. Mirrors backend DTOs (spec 05 / 11). */
-
 export type ItemStatus = 'ACTIVE' | 'CLAIMED' | 'RETURNED' | 'CLOSED' | 'HIDDEN';
 
 export const ITEM_STATUSES: ItemStatus[] = ['ACTIVE', 'CLAIMED', 'RETURNED', 'CLOSED', 'HIDDEN'];
@@ -15,7 +13,6 @@ export interface User {
   createdAt: string;
 }
 
-/** Another account's profile as shown on `/users/:id` (no email/phone). */
 export interface PublicUser {
   id: string;
   username: string;
@@ -52,10 +49,8 @@ export type LostReportStatus = 'OPEN' | 'CLOSED';
 
 export type MatchMethod = 'photo' | 'text';
 
-/** A found item that a lost-item photo search surfaced. */
 export interface LostReportMatch {
   itemId: string;
-  /** Similarity score 0–1; shown as a percentage. */
   score: number;
   method: MatchMethod;
   title: string;
@@ -64,7 +59,6 @@ export interface LostReportMatch {
   available: boolean;
 }
 
-/** A saved "I lost something" search: photos + its matches. */
 export interface LostReport {
   id: string;
   title: string;
@@ -97,7 +91,6 @@ export interface Paginated<T> {
   pagination: Pagination;
 }
 
-/** Narrows a backend status string; unknown values map to HIDDEN. */
 export function toItemStatus(status: string): ItemStatus {
   return (ITEM_STATUSES as string[]).includes(status) ? (status as ItemStatus) : 'HIDDEN';
 }

@@ -1,6 +1,7 @@
 .item-claims__note {
   margin-bottom: var(--space-4);
   font-size: var(--font-size-sm);
+  color: var(--text-muted);
 }
 
 .item-claims__list {
@@ -18,7 +19,9 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .item-claims__info {
@@ -62,5 +65,10 @@
 @media (max-width: 480px) {
   .item-claims__item {
     flex-direction: column;
+  }
+
+  .item-claims__info {
+    flex: 0 0 auto;
+    width: 100%;
   }
 }

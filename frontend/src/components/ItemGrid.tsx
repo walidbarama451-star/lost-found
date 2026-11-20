@@ -5,7 +5,6 @@ import './ItemGrid.css';
 
 interface ItemGridProps {
   items: PublicItem[];
-  /** Per-card owner actions (rendered inside each card footer). */
   actionsFor?: (item: PublicItem) => ReactNode;
 }
 

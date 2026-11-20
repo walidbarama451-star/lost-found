@@ -33,7 +33,7 @@ The frontend is a browser client. It must never connect directly to MongoDB or c
 ## Main components
 
 - `AppLayout`
-- `Sidebar`
+- `TopNav`
 - `ProtectedRoute`
 - `ItemCard`
 - `ItemGrid`

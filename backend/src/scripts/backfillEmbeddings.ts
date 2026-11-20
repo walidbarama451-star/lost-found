@@ -1,12 +1,3 @@
-/**
- * One-off maintenance script: computes photo embeddings for items (and lost
- * reports) that were uploaded before the matching feature existed, so they can
- * participate in photo matching.
- *
- * Usage:  npm run backfill-embeddings
- * Requires HF_TOKEN to be configured (see .env.example).
- */
-
 import mongoose from 'mongoose';
 import { embedImage } from '../config/imageEmbedding.js';
 import { env } from '../config/env.js';

@@ -34,8 +34,6 @@ export function createApp(): Express {
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
 
-  // Secure response headers. Images may be served cross-origin to the
-  // frontend dev server, so the resource policy must allow it.
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
   app.use(
@@ -55,10 +53,8 @@ export function createApp(): Express {
     next();
   });
 
-  // CSRF defence for cookie-based sessions.
   app.use('/api', requireSameOrigin);
 
-  // Local image storage fallback (Cloudinary is used when configured).
   if (env.imageStorage === 'local') {
     app.use(
       '/uploads',

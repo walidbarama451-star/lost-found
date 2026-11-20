@@ -1,5 +1,3 @@
-/** Client-side item validation mirroring backend rules (item.schema.ts). */
-
 import { z } from 'zod';
 
 export const itemSchema = z.object({

@@ -22,11 +22,9 @@ interface LostReportListResult {
 }
 
 function loadOwnedReport(reportId: string, userId: string): Promise<LostReportDoc | null> {
-  // Embeddings are excluded by default; re-running the photo search needs them.
   return LostReport.findOne({ _id: reportId, owner: userId }).select('+images.embedding');
 }
 
-/** Stores the uploaded photos and attaches embeddings when the service is up. */
 async function storePhotos(
   files: Express.Multer.File[],
 ): Promise<{ url: string; publicId: string; embedding?: number[] }[]> {
@@ -39,7 +37,6 @@ async function storePhotos(
   return stored;
 }
 
-/** Loads every ACTIVE item (except the searcher's own) with photo vectors. */
 async function loadCandidates(ownerId: string): Promise<{ docs: ItemDoc[]; candidates: MatchCandidate[] }> {
   const docs = (await Item.find({ status: 'ACTIVE', createdBy: { $ne: ownerId } }).select(
     '+images.embedding',
@@ -56,10 +53,6 @@ async function loadCandidates(ownerId: string): Promise<{ docs: ItemDoc[]; candi
   return { docs, candidates };
 }
 
-/**
- * Runs the photo search for a report: scores every active found item against
- * the report's photos and persists the matches above the similarity threshold.
- */
 async function runSearch(report: LostReportDoc): Promise<LostReportDoc> {
   const { docs, candidates } = await loadCandidates(String(report.owner));
 
@@ -87,7 +80,6 @@ async function runSearch(report: LostReportDoc): Promise<LostReportDoc> {
   return report;
 }
 
-/** Loads the live item documents for a report's stored matches. */
 async function loadMatchedItems(report: LostReportDoc): Promise<ItemDoc[]> {
   const ids = report.matches.map((match) => match.item);
   if (ids.length === 0) return [];
@@ -117,7 +109,6 @@ export async function createLostReport(
     const itemDocs = await loadMatchedItems(searched);
     return toLostReportDto(searched, itemDocs);
   } catch (error) {
-    // Report creation failed after upload — clean up the orphaned assets.
     await Promise.all(uploaded.map((image) => deleteImage(image.publicId)));
     throw error;
   }
@@ -155,7 +146,6 @@ export async function getMyReport(reportId: string, userId: string): Promise<Los
   return toLostReportDto(report, itemDocs);
 }
 
-/** Re-runs the photo search so newly published found items can appear. */
 export async function searchReport(reportId: string, userId: string): Promise<LostReportDto> {
   const report = await loadOwnedReport(reportId, userId);
   if (!report) throw AppError.notFound('Lost report not found');

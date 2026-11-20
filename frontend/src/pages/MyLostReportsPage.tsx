@@ -5,6 +5,7 @@ import ErrorState from '../components/ErrorState';
 import ItemCard from '../components/ItemCard';
 import LoadingState from '../components/LoadingState';
 import { deleteLostReport, listMyReports, searchLostReport } from '../features/lostReports/lostReportsService';
+import { resolveImageUrl } from '../lib/api';
 import { useApi } from '../lib/useApi';
 import { toDisplayError } from '../lib/validation';
 import { formatDate, formatDateTime } from '../lib/format';
@@ -13,7 +14,6 @@ import './MyLostReportsPage.css';
 
 const percentage = (score: number): string => `${Math.round(score * 100)}%`;
 
-/** Lists every saved lost-item search with its latest matches. */
 export default function MyLostReportsPage() {
   const reports = useApi(() => listMyReports({ page: 1, limit: 24 }), []);
   const [busyReport, setBusyReport] = useState<string | null>(null);
@@ -126,8 +126,9 @@ export default function MyLostReportsPage() {
                     <img
                       key={image.url}
                       className="lost-reports__photo"
-                      src={image.url}
+                      src={resolveImageUrl(image.url) ?? undefined}
                       alt={`Photo of the lost ${report.title}`}
+                      loading="lazy"
                     />
                   ))}
                 </div>

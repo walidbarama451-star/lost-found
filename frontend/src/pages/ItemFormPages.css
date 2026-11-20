@@ -1,3 +1,4 @@
 .item-form-page__card {
-  padding: var(--space-5);
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+  border-radius: var(--radius-lg);
 }

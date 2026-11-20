@@ -5,7 +5,6 @@ export type ItemStatus = 'ACTIVE' | 'CLAIMED' | 'RETURNED' | 'CLOSED' | 'HIDDEN'
 export interface ItemImage {
   url: string;
   publicId: string;
-  /** CLIP-style vector; absent when the embedding service was unavailable. */
   embedding?: number[];
 }
 

@@ -2,12 +2,6 @@ import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, createItem, pngBuffer, registerUser } from './helpers.js';
 
-/**
- * The embedding service is mocked: photo vectors are keyed by the uploaded
- * buffer length, so a test can stage "this photo looks like that photo"
- * scenarios without any network access. A missing entry means the photo was
- * uploaded while the embedding service was unavailable (null vector).
- */
 const state = vi.hoisted(() => ({ vectors: new Map<number, number[]>() }));
 
 vi.mock('../src/config/imageEmbedding.js', () => ({
@@ -53,7 +47,6 @@ describe('lost report creation and photo matching', () => {
     const finder = await registerUser({ email: 'finder@example.com' });
     const searcher = await registerUser({ email: 'searcher@example.com' });
 
-    // Both photos carry the same vector → they "look alike".
     const vector = [0.9, 0.4, 0.1, 0.05];
     state.vectors.set(pngBuffer().length, vector);
     const { id: itemId } = await createItem(finder);
@@ -65,10 +58,8 @@ describe('lost report creation and photo matching', () => {
     expect(report.matches).toHaveLength(1);
     expect(report.matches[0]).toMatchObject({ itemId, method: 'photo', available: true });
     expect(report.matches[0].score).toBeGreaterThan(0.99);
-    // Embeddings must never leak into the response.
     expect(JSON.stringify(res.body)).not.toContain('embedding');
 
-    // The match unlocks the detail page for the searcher.
     const detail = await request(app).get(`/api/items/${itemId}`).set('Cookie', searcher.cookie);
     expect(detail.status).toBe(200);
     expect(detail.body.data.item.id).toBe(itemId);
@@ -105,7 +96,6 @@ describe('lost report creation and photo matching', () => {
     expect(res.status).toBe(201);
     expect(res.body.data.report.matches).toHaveLength(0);
 
-    // The owner still sees their own listing.
     const detail = await request(app).get(`/api/items/${itemId}`).set('Cookie', finder.cookie);
     expect(detail.status).toBe(200);
   });
@@ -115,9 +105,8 @@ describe('lost report creation and photo matching', () => {
     const searcher = await registerUser({ email: 'searcher@example.com' });
 
     const { id: itemId } = await createItem(finder);
-    expect(state.vectors.size).toBe(0); // embedding service unavailable
+    expect(state.vectors.size).toBe(0);
 
-    // Near-identical wording clears the text threshold.
     const res = await createLostReport(searcher, {
       title: 'Black wallet',
     });
@@ -197,7 +186,6 @@ describe('lost report search lifecycle', () => {
       .set('Cookie', searcher.cookie);
     expect(after.body.data.report.matches).toHaveLength(0);
 
-    // Re-running the search must not resurrect the deleted listing.
     const rerun = await request(app)
       .post(`/api/lost-reports/${reportId}/search`)
       .set('Cookie', searcher.cookie);

@@ -10,10 +10,6 @@ interface ClaimFormProps {
   onSubmitted?: () => void;
 }
 
-/**
- * Private claim submission. The privacy reminder is a product requirement
- * (spec 11 + product rule: proof stays off the public listing).
- */
 export default function ClaimForm({ itemId, onSubmitted }: ClaimFormProps) {
   const [message, setMessage] = useState('');
   const [fieldError, setFieldError] = useState<string | null>(null);

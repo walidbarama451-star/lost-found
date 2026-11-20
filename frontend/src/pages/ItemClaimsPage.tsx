@@ -52,7 +52,6 @@ export default function ItemClaimsPage() {
   };
 
   if (loading) return <LoadingState label="Loading claims…" />;
-  // Includes the backend's 403 message when you don't own the listing.
   if (error || !data) return <ErrorState message={error ?? 'Listing not found.'} onRetry={reload} />;
 
   const { item, claims } = data;
@@ -119,7 +118,7 @@ export default function ItemClaimsPage() {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-secondary btn-sm"
                       onClick={() => setPending({ claim, decision: 'REJECTED' })}
                       disabled={isPendingReview}
                     >

@@ -48,7 +48,6 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
     return;
   }
 
-  // Invalid ObjectId or other malformed database identifier.
   if ((error as { name?: string }).name === 'CastError') {
     res.status(400).json({ success: false, message: 'Invalid identifier', errors: [] });
     return;

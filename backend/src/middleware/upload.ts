@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 import { AppError } from '../shared/errors/AppError.js';
 
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGES_PER_LISTING = 5;
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);

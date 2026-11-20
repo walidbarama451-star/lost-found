@@ -7,14 +7,12 @@ interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  /** Styling + semantics for destructive actions. */
   danger?: boolean;
   busy?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-/** Accessible confirmation modal for destructive actions (spec 11). */
 export default function ConfirmDialog({
   open,
   title,

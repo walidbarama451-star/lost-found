@@ -4,7 +4,6 @@ import './EmptyState.css';
 interface EmptyStateProps {
   title: string;
   message?: string;
-  /** Optional call-to-action rendered under the message. */
   action?: ReactNode;
 }
 

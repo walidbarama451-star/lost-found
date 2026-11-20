@@ -1,5 +1,3 @@
-/** Pure matching core: pairs a lost report's photos against found items. */
-
 import { env } from '../../config/env.js';
 import { cosineSimilarity, textSimilarity } from '../../shared/utils/similarity.js';
 import type { MatchMethod } from './lostReport.model.js';
@@ -7,7 +5,6 @@ import type { MatchMethod } from './lostReport.model.js';
 export interface MatchCandidate {
   itemId: string;
   title: string;
-  /** Vectors for the item's photos (may be empty when the service was down). */
   imageEmbeddings: number[][];
 }
 
@@ -21,7 +18,6 @@ export interface ScoredCandidate extends MatchResult {
   candidate: MatchCandidate;
 }
 
-/** Best cosine similarity between the report's photos and an item's photos. */
 function bestPhotoScore(
   reportEmbeddings: number[][],
   itemEmbeddings: number[][],
@@ -36,23 +32,11 @@ function bestPhotoScore(
   return best;
 }
 
-/**
- * Text fallback for pairs without photo vectors (service unavailable):
- * title-wording similarity, capped below the photo ceiling so a text match
- * never outranks a real photo match.
- */
 function textScore(reportText: string, candidate: MatchCandidate): number {
   const similarity = textSimilarity(reportText, candidate.title);
   return Math.min(0.95, similarity * 0.85);
 }
 
-/**
- * Scores every candidate and keeps those above their method's threshold,
- * strongest first. Photo matches use embeddings and the strict photo
- * threshold; when the report or the item has no vectors (embedding service
- * unavailable) the title-text fallback applies with its own, more forgiving
- * threshold.
- */
 export function computeMatches(
   reportText: string,
   reportEmbeddings: number[][],

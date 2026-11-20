@@ -7,7 +7,13 @@
 
 .profile-page__form,
 .profile-page__aside {
-  padding: var(--space-5);
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.profile-page__aside {
+  background:
+    radial-gradient(90% 100% at 0% 0%, color-mix(in srgb, var(--gradient-blue) 20%, white), transparent 65%),
+    var(--surface-card);
 }
 
 .profile-page__form h2,

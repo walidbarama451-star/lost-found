@@ -1,8 +1,3 @@
-/**
- * ProtectedRoute (spec 11): unauthenticated visitors are redirected to
- * /login; authenticated visitors see the children.
- */
-
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';

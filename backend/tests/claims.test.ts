@@ -28,7 +28,6 @@ describe('claim submission', () => {
     const asOwner = await request(app).get(`/api/items/${id}`).set('Cookie', owner.cookie);
     expect(JSON.stringify(asOwner.body)).not.toContain('serial number');
 
-    // Unmatched users cannot even see the listing exists.
     const bystander = await registerUser({ email: 'bystander@example.com' });
     const asBystander = await request(app).get(`/api/items/${id}`).set('Cookie', bystander.cookie);
     expect(asBystander.status).toBe(404);
@@ -181,7 +180,6 @@ describe('claim decisions', () => {
     const statuses = [decisionA.status, decisionB.status].sort();
     expect(statuses).toEqual([200, 409]);
 
-    // The listing must have exactly one accepted claim.
     const item = await listItem(id, owner);
     expect(item.status).toBe('CLAIMED');
 
@@ -215,7 +213,6 @@ describe('claim decisions', () => {
       .send({ decision: 'ACCEPTED' });
     expect(second.status).toBe(409);
 
-    // The rejected-race claim stays pending so the owner can still reject it.
     const reject = await request(app)
       .patch(`/api/claims/${claimB.id}/decision`)
       .set('Cookie', owner.cookie)
@@ -261,7 +258,6 @@ describe('claim visibility and withdrawal', () => {
     expect(withdraw.status).toBe(200);
     expect(withdraw.body.data.claim.status).toBe('WITHDRAWN');
 
-    // After withdrawal a new claim is possible (only PENDING is unique).
     const again = await submitClaim(claimant, id);
     expect(again.status).toBe(201);
   });
@@ -292,7 +288,6 @@ describe('claim visibility and withdrawal', () => {
     expect(returned.body.data.item.status).toBe('RETURNED');
     expect(returned.body.data.item.returnedAt).toBeTruthy();
 
-    // Returned listings are no longer visible to anyone via the search flow.
     const mine = await request(app).get('/api/items/mine').set('Cookie', owner.cookie);
     const returnedItem = mine.body.data.items.find((entry: { id: string }) => entry.id === id);
     expect(returnedItem.status).toBe('RETURNED');
