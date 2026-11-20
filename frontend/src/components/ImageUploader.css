@@ -55,7 +55,7 @@
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: oklch(20% 0.005 80 / 0.78);
+  background: var(--overlay-strong);
   color: var(--text-on-primary);
   font-size: 1rem;
   line-height: 1;

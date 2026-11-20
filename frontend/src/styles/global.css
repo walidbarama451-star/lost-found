@@ -160,10 +160,9 @@ a:hover {
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(70% 110% at 8% 0%, color-mix(in srgb, var(--gradient-blue) 62%, white) 0%, transparent 58%),
-    radial-gradient(60% 100% at 92% 8%, color-mix(in srgb, var(--gradient-pink) 58%, white) 0%, transparent 58%),
-    radial-gradient(55% 90% at 62% 105%, color-mix(in srgb, var(--gradient-red) 44%, white) 0%, transparent 62%),
-    radial-gradient(48% 78% at 28% 78%, color-mix(in srgb, var(--gradient-orange) 34%, white) 0%, transparent 62%),
+    radial-gradient(75% 110% at 10% 0%, color-mix(in srgb, var(--gradient-blue) 28%, white) 0%, transparent 60%),
+    radial-gradient(65% 100% at 92% 8%, color-mix(in srgb, var(--gradient-blue-soft) 55%, white) 0%, transparent 60%),
+    radial-gradient(70% 95% at 62% 105%, color-mix(in srgb, var(--gradient-blue-deep) 20%, white) 0%, transparent 65%),
     var(--surface-canvas);
 }
 

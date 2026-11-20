@@ -3,45 +3,29 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import './TopNav.css';
 
-type IconName = 'home' | 'user';
-
-function NavIcon({ name }: { name: IconName }) {
-  const common = {
-    width: 18,
-    height: 18,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 1.8,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-    'aria-hidden': true,
-  };
-
-  switch (name) {
-    case 'home':
-      return (
-        <svg {...common}>
-          <path d="M3 10.5 12 3l9 7.5" />
-          <path d="M5.5 9.5V21h13V9.5" />
-        </svg>
-      );
-    default:
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
-      );
-  }
+function NavIcon() {
+  return (
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden={true}
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  );
 }
 
 const AUTH_NAV = [
-  { to: '/login', label: 'Sign in', icon: 'user' as IconName },
-  { to: '/register', label: 'Create account', icon: 'user' as IconName },
+  { to: '/login', label: 'Sign in' },
+  { to: '/register', label: 'Create account' },
 ];
-
-const APP_NAV = [{ to: '/dashboard', label: 'Home', icon: 'home' as IconName }];
 
 export default function TopNav() {
   const { user, logout } = useAuth();
@@ -89,13 +73,13 @@ export default function TopNav() {
 
   const toggleAdd = () => setAddOpen((value) => !value);
 
-  const navItems = user ? APP_NAV : AUTH_NAV;
+  const navItems = user ? [] : AUTH_NAV;
   const initial = user?.username?.charAt(0).toUpperCase() ?? '?';
 
   return (
     <header className="topnav">
       <div className="topnav__inner app-container">
-        <Link className="topnav__brand" to="/" onClick={close}>
+        <Link className="topnav__brand" to={user ? '/dashboard' : '/'} onClick={close}>
           <span className="topnav__brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
@@ -116,20 +100,22 @@ export default function TopNav() {
         </button>
 
         <div id="topnav-menu" className={`topnav__menu${open ? ' topnav__menu--open' : ''}`}>
-          <nav className="topnav__nav" aria-label="Main" onClick={close}>
-            {navItems.map((item) => (
-              <NavLink
-                key={`${item.to}-${item.label}`}
-                to={item.to}
-                className={({ isActive }) =>
-                  `topnav__link${isActive ? ' topnav__link--active' : ''}`
-                }
-              >
-                <NavIcon name={item.icon} />
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+          {navItems.length > 0 ? (
+            <nav className="topnav__nav" aria-label="Main" onClick={close}>
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `topnav__link${isActive ? ' topnav__link--active' : ''}`
+                  }
+                >
+                  <NavIcon />
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          ) : null}
 
           {user ? (
             <div className="topnav__actions">

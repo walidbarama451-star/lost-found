@@ -12,7 +12,12 @@
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.06em;
-  background: linear-gradient(92deg, #1f55f1 0%, #8e48ff 45%, #fd4f48 100%);
+  background: linear-gradient(
+    92deg,
+    var(--gradient-blue-deep) 0%,
+    var(--gradient-blue) 48%,
+    var(--gradient-blue-light) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

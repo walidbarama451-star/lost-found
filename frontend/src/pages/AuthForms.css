@@ -9,9 +9,9 @@
   overflow: hidden;
   border-radius: var(--radius-xl);
   background:
-    radial-gradient(65% 90% at 12% 5%, color-mix(in srgb, var(--gradient-blue) 46%, white), transparent 60%),
-    radial-gradient(60% 80% at 88% 10%, color-mix(in srgb, var(--gradient-pink) 42%, white), transparent 62%),
-    radial-gradient(55% 80% at 65% 100%, color-mix(in srgb, var(--gradient-red) 30%, white), transparent 62%),
+    radial-gradient(65% 90% at 12% 5%, color-mix(in srgb, var(--gradient-blue) 24%, white), transparent 60%),
+    radial-gradient(60% 80% at 88% 10%, color-mix(in srgb, var(--gradient-blue-soft) 48%, white), transparent 62%),
+    radial-gradient(55% 80% at 65% 100%, color-mix(in srgb, var(--gradient-blue-deep) 16%, white), transparent 62%),
     var(--surface-canvas);
 }
 

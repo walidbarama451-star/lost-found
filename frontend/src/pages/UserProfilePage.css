@@ -11,7 +11,7 @@
   border-radius: var(--radius-xl);
   background:
     radial-gradient(90% 80% at 10% 0%, color-mix(in srgb, var(--gradient-blue) 18%, white), transparent 65%),
-    radial-gradient(70% 70% at 100% 10%, color-mix(in srgb, var(--gradient-pink) 14%, white), transparent 65%),
+    radial-gradient(70% 70% at 100% 10%, color-mix(in srgb, var(--gradient-blue-soft) 26%, white), transparent 65%),
     var(--surface-card);
 }
 

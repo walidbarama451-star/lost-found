@@ -58,6 +58,7 @@ describe('TopNav', () => {
       'href',
       '/register'
     );
+    expect(screen.getByRole('link', { name: 'Found It' })).toHaveAttribute('href', '/');
     expect(screen.queryByRole('link', { name: /profile/i })).not.toBeInTheDocument();
   });
 
@@ -71,10 +72,11 @@ describe('TopNav', () => {
     expect(profileLink).toHaveAttribute('href', '/profile');
     expect(profileLink).toHaveTextContent('walid');
     expect(screen.queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Found It' })).toHaveAttribute(
       'href',
       '/dashboard'
     );
+    expect(screen.queryByRole('link', { name: 'Home' })).not.toBeInTheDocument();
   });
 
   it('opens the New menu and closes it on outside click', async () => {
