@@ -46,19 +46,14 @@ function renderTopNav() {
 }
 
 describe('TopNav', () => {
-  it('shows sign-in links when signed out', async () => {
+  it('omits the auth links from the top bar when signed out', async () => {
     stubSession(false);
     renderTopNav();
 
-    expect(await screen.findByRole('link', { name: 'Sign in' })).toHaveAttribute(
-      'href',
-      '/login'
-    );
-    expect(screen.getByRole('link', { name: 'Create account' })).toHaveAttribute(
-      'href',
-      '/register'
-    );
-    expect(screen.getByRole('link', { name: 'Found It' })).toHaveAttribute('href', '/');
+    expect(await screen.findByRole('link', { name: 'Found It' })).toHaveAttribute('href', '/');
+    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Menu' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /profile/i })).not.toBeInTheDocument();
   });
 

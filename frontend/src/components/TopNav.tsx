@@ -3,30 +3,6 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import './TopNav.css';
 
-function NavIcon() {
-  return (
-    <svg
-      width={18}
-      height={18}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden={true}
-    >
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
-    </svg>
-  );
-}
-
-const AUTH_NAV = [
-  { to: '/login', label: 'Sign in' },
-  { to: '/register', label: 'Create account' },
-];
-
 export default function TopNav() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -73,9 +49,6 @@ export default function TopNav() {
 
   const toggleAdd = () => setAddOpen((value) => !value);
 
-  const navItems = user ? [] : AUTH_NAV;
-  const initial = user?.username?.charAt(0).toUpperCase() ?? '?';
-
   return (
     <header className="topnav">
       <div className="topnav__inner app-container">
@@ -89,34 +62,19 @@ export default function TopNav() {
           Found It
         </Link>
 
-        <button
-          type="button"
-          className="topnav__toggle"
-          aria-expanded={open}
-          aria-controls="topnav-menu"
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? 'Close' : 'Menu'}
-        </button>
+        {user ? (
+          <button
+            type="button"
+            className="topnav__toggle"
+            aria-expanded={open}
+            aria-controls="topnav-menu"
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? 'Close' : 'Menu'}
+          </button>
+        ) : null}
 
         <div id="topnav-menu" className={`topnav__menu${open ? ' topnav__menu--open' : ''}`}>
-          {navItems.length > 0 ? (
-            <nav className="topnav__nav" aria-label="Main" onClick={close}>
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `topnav__link${isActive ? ' topnav__link--active' : ''}`
-                  }
-                >
-                  <NavIcon />
-                  {item.label}
-                </NavLink>
-              ))}
-            </nav>
-          ) : null}
-
           {user ? (
             <div className="topnav__actions">
               <div className="topnav__add" ref={addRef}>
@@ -154,9 +112,6 @@ export default function TopNav() {
                 aria-label={`View ${user.username}'s profile`}
                 title="View your profile"
               >
-                <span className="topnav__avatar" aria-hidden="true">
-                  {initial}
-                </span>
                 <span className="topnav__profile-name">{user.username}</span>
               </NavLink>
 
