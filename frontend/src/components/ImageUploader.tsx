@@ -2,7 +2,53 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import './ImageUploader.css';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 3 * 1024 * 1024;
+const MAX_SOURCE_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_DIMENSION = 1600;
+const COMPRESS_THRESHOLD = 1.5 * 1024 * 1024;
+const JPEG_QUALITY = 0.82;
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY));
+}
+
+async function prepareImage(file: File): Promise<File> {
+  if (typeof createImageBitmap !== 'function') return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const longestSide = Math.max(bitmap.width, bitmap.height);
+    const needsResize = longestSide > MAX_DIMENSION;
+    const needsCompression = file.size > COMPRESS_THRESHOLD;
+
+    if (!needsResize && !needsCompression) {
+      bitmap.close();
+      return file;
+    }
+
+    const scale = Math.min(1, MAX_DIMENSION / longestSide);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      bitmap.close();
+      return file;
+    }
+
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+
+    const blob = await canvasToBlob(canvas);
+    if (!blob || blob.size >= file.size) return file;
+
+    const name = `${file.name.replace(/\.[^.]+$/, '')}.jpg`;
+    return new File([blob], name, { type: 'image/jpeg', lastModified: Date.now() });
+  } catch {
+    return file;
+  }
+}
 
 interface ImageUploaderProps {
   files: File[];
@@ -29,6 +75,7 @@ export default function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [localError, setLocalError] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Preview[]>([]);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     const next = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
@@ -40,30 +87,45 @@ export default function ImageUploader({
 
   const remaining = maxImages - existingCount - files.length;
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(event.target.files ?? []);
     event.target.value = '';
     if (chosen.length === 0) return;
 
-    const rejected: string[] = [];
-    const accepted: File[] = [];
-    for (const file of chosen) {
-      if (!ACCEPTED_TYPES.includes(file.type)) {
-        rejected.push(`${file.name}: use JPEG, PNG or WebP`);
-      } else if (file.size > MAX_FILE_SIZE) {
-        rejected.push(`${file.name}: must be 5 MB or smaller`);
-      } else {
-        accepted.push(file);
+    setProcessing(true);
+    try {
+      const rejected: string[] = [];
+      const candidates: File[] = [];
+      for (const file of chosen) {
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+          rejected.push(`${file.name}: use JPEG, PNG or WebP`);
+        } else if (file.size > MAX_SOURCE_FILE_SIZE) {
+          rejected.push(`${file.name}: must be 20 MB or smaller`);
+        } else {
+          candidates.push(file);
+        }
       }
-    }
 
-    if (accepted.length > remaining) {
-      rejected.push(`You can attach at most ${maxImages} images`);
-      accepted.length = Math.max(0, remaining);
-    }
+      const prepared = await Promise.all(candidates.map(prepareImage));
+      const accepted: File[] = [];
+      for (const file of prepared) {
+        if (file.size > MAX_FILE_SIZE) {
+          rejected.push(`${file.name}: could not be reduced below 3 MB`);
+        } else {
+          accepted.push(file);
+        }
+      }
 
-    setLocalError(rejected.length > 0 ? rejected.join(' · ') : null);
-    if (accepted.length > 0) onFilesChange([...files, ...accepted]);
+      if (accepted.length > remaining) {
+        rejected.push(`You can attach at most ${maxImages} images`);
+        accepted.length = Math.max(0, remaining);
+      }
+
+      setLocalError(rejected.length > 0 ? rejected.join(' · ') : null);
+      if (accepted.length > 0) onFilesChange([...files, ...accepted]);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const removeFile = (index: number) => {
@@ -83,7 +145,9 @@ export default function ImageUploader({
         </span>
       </div>
 
-      <p className="form-hint">JPEG, PNG or WebP · each up to 5 MB.</p>
+      <p className="form-hint">
+        JPEG, PNG or WebP · each up to 3 MB. Large photos are resized automatically.
+      </p>
 
       <input
         ref={inputRef}
@@ -93,16 +157,16 @@ export default function ImageUploader({
         accept={ACCEPTED_TYPES.join(',')}
         multiple
         onChange={handleChange}
-        disabled={disabled || remaining <= 0}
+        disabled={disabled || processing || remaining <= 0}
         aria-labelledby="image-uploader-label"
       />
       <button
         type="button"
         className="btn btn-secondary btn-sm"
         onClick={() => inputRef.current?.click()}
-        disabled={disabled || remaining <= 0}
+        disabled={disabled || processing || remaining <= 0}
       >
-        Add photos
+        {processing ? 'Optimizing…' : 'Add photos'}
       </button>
 
       {message ? (

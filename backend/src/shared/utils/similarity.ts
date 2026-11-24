@@ -20,6 +20,34 @@ export function cosineSimilarity(a: readonly number[], b: readonly number[]): nu
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
+export function normalizeVector(vector: readonly number[]): number[] {
+  let squaredNorm = 0;
+  for (const value of vector) squaredNorm += value * value;
+  if (squaredNorm === 0) return vector.map(() => 0);
+
+  const scale = 1 / Math.sqrt(squaredNorm);
+  return vector.map((value) => value * scale);
+}
+
+export function isNormalized(vector: readonly number[], tolerance = 1e-6): boolean {
+  let squaredNorm = 0;
+  for (const value of vector) squaredNorm += value * value;
+  return Math.abs(squaredNorm - 1) <= tolerance;
+}
+
+export function normalizeIfNeeded(vector: readonly number[]): readonly number[] {
+  return isNormalized(vector) ? vector : normalizeVector(vector);
+}
+
+export function dotProduct(a: readonly number[], b: readonly number[]): number {
+  if (a.length === 0 || a.length !== b.length) return 0;
+  let dot = 0;
+  for (let index = 0; index < a.length; index += 1) {
+    dot += (a[index] ?? 0) * (b[index] ?? 0);
+  }
+  return dot;
+}
+
 function stem(token: string): string {
   return token.length > 3 && token.endsWith('s') ? token.slice(0, -1) : token;
 }

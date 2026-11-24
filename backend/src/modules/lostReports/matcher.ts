@@ -1,11 +1,11 @@
 import { env } from '../../config/env.js';
-import { cosineSimilarity, textSimilarity } from '../../shared/utils/similarity.js';
+import { dotProduct, textSimilarity } from '../../shared/utils/similarity.js';
 import type { MatchMethod } from './lostReport.model.js';
 
 export interface MatchCandidate {
   itemId: string;
   title: string;
-  imageEmbeddings: number[][];
+  imageEmbeddings: readonly (readonly number[])[];
 }
 
 export interface MatchResult {
@@ -19,13 +19,13 @@ export interface ScoredCandidate extends MatchResult {
 }
 
 function bestPhotoScore(
-  reportEmbeddings: number[][],
-  itemEmbeddings: number[][],
+  reportEmbeddings: readonly (readonly number[])[],
+  itemEmbeddings: readonly (readonly number[])[],
 ): number {
   let best = 0;
   for (const reportVector of reportEmbeddings) {
     for (const itemVector of itemEmbeddings) {
-      const score = cosineSimilarity(reportVector, itemVector);
+      const score = dotProduct(reportVector, itemVector);
       if (score > best) best = score;
     }
   }
@@ -39,7 +39,7 @@ function textScore(reportText: string, candidate: MatchCandidate): number {
 
 export function computeMatches(
   reportText: string,
-  reportEmbeddings: number[][],
+  reportEmbeddings: readonly (readonly number[])[],
   candidates: MatchCandidate[],
 ): MatchResult[] {
   const photoThreshold = env.similarityThreshold;

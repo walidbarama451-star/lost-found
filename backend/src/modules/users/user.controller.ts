@@ -9,7 +9,7 @@ import { getPublicProfile, updateProfile } from './user.service.js';
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw AppError.unauthorized();
 
-  const doc = await User.findById(req.user.id);
+  const doc = await User.findById(req.user.id).lean();
   if (!doc) throw AppError.unauthorized('Your session is invalid or has expired');
 
   ok(res, { user: toSafeUser(doc) });

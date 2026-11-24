@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { connectDatabase, disconnectDatabase } from '../config/database.js';
 import { Item } from '../modules/items/item.model.js';
 import { LostReport } from '../modules/lostReports/lostReport.model.js';
+import { normalizeVector } from '../shared/utils/similarity.js';
 
 async function backfillItems(): Promise<{ images: number; items: number }> {
   const items = await Item.find({ 'images.embedding': { $exists: false } }).select('+images.embedding');
@@ -21,7 +22,7 @@ async function backfillItems(): Promise<{ images: number; items: number }> {
       const buffer = Buffer.from(await response.arrayBuffer());
       const embedding = await embedImage(buffer, 'image/jpeg');
       if (embedding) {
-        image.embedding = embedding;
+        image.embedding = normalizeVector(embedding);
         changed = true;
         images += 1;
       }
@@ -49,7 +50,7 @@ async function backfillReports(): Promise<{ images: number; reports: number }> {
       const buffer = Buffer.from(await response.arrayBuffer());
       const embedding = await embedImage(buffer, 'image/jpeg');
       if (embedding) {
-        image.embedding = embedding;
+        image.embedding = normalizeVector(embedding);
         changed = true;
         images += 1;
       }

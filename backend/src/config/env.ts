@@ -37,6 +37,11 @@ export const env = {
   get jwtExpiresIn(): string {
     return process.env.JWT_EXPIRES_IN ?? '30m';
   },
+  get bcryptCost(): number {
+    const fallback = this.isTest ? 4 : 12;
+    const value = Number(process.env.BCRYPT_COST ?? fallback);
+    return Number.isInteger(value) && value >= 4 && value <= 15 ? value : fallback;
+  },
   get clientUrl(): string {
     return process.env.CLIENT_URL ?? 'http://localhost:5173';
   },
@@ -71,5 +76,17 @@ export const env = {
   get textMatchThreshold(): number {
     const value = Number(process.env.TEXT_MATCH_THRESHOLD ?? '0.45');
     return Number.isFinite(value) && value > 0 && value < 1 ? value : 0.45;
+  },
+  get matchCandidateLimit(): number {
+    const value = Number(process.env.MATCH_CANDIDATE_LIMIT ?? '2000');
+    return Number.isInteger(value) && value > 0 ? value : 2000;
+  },
+  get matchLookbackDays(): number {
+    const value = Number(process.env.MATCH_LOOKBACK_DAYS ?? '0');
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  },
+  get userCacheTtlMs(): number {
+    const value = Number(process.env.USER_CACHE_TTL_MS ?? '30000');
+    return Number.isInteger(value) && value >= 0 ? value : 30000;
   },
 };

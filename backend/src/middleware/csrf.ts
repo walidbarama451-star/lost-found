@@ -17,10 +17,9 @@ export function requireSameOrigin(req: Request, _res: Response, next: NextFuncti
   }
 
   const allowed = new Set<string>([env.clientUrl.replace(/\/$/, '')]);
-  try {
-    allowed.add(`${req.protocol}://${req.get('host')}`);
-  } catch {
-
+  const host = req.get('host');
+  if (host) {
+    allowed.add(`${req.protocol}://${host}`);
   }
 
   if (!allowed.has(origin)) {

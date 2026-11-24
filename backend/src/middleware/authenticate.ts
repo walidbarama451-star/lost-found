@@ -29,7 +29,12 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
       throw AppError.unauthorized('Your session is invalid or has expired');
     }
 
-    req.user = { id: user.id, username: user.username, email: user.email, role: user.role };
+    req.user = {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
     next();
   } catch (error) {
     next(error);

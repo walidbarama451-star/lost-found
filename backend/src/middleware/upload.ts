@@ -2,14 +2,21 @@ import type { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 import { AppError } from '../shared/errors/AppError.js';
 
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+export const MAX_TOTAL_UPLOAD_BYTES = 10 * 1024 * 1024;
 export const MAX_IMAGES_PER_LISTING = 5;
+export const MAX_IMAGES_PER_REPORT = 3;
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 export const uploadImages = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_IMAGE_BYTES, files: MAX_IMAGES_PER_LISTING },
+  limits: {
+    fileSize: MAX_IMAGE_BYTES,
+    files: MAX_IMAGES_PER_LISTING,
+    fields: 10,
+    parts: 20,
+  },
   fileFilter: (_req, file, callback) => {
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
       callback(AppError.unsupportedMedia('Only JPEG, PNG and WebP images are allowed'));
@@ -18,6 +25,16 @@ export const uploadImages = multer({
     callback(null, true);
   },
 });
+
+export function assertTotalUploadSize(req: Request, _res: Response, next: NextFunction): void {
+  const files = req.files as Express.Multer.File[] | undefined;
+  const totalBytes = files?.reduce((sum, file) => sum + file.size, 0) ?? 0;
+  if (totalBytes > MAX_TOTAL_UPLOAD_BYTES) {
+    next(AppError.payloadTooLarge('The combined upload must be 10 MB or smaller'));
+    return;
+  }
+  next();
+}
 
 export function sniffImageType(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {

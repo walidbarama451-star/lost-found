@@ -24,7 +24,6 @@ const claimSchema = new Schema<ClaimRecord>(
   { timestamps: true },
 );
 
-claimSchema.index({ item: 1, claimant: 1, status: 1 });
 claimSchema.index({ claimant: 1, createdAt: -1 });
 claimSchema.index({ item: 1, createdAt: -1 });
 claimSchema.index({ item: 1, claimant: 1 }, { unique: true, partialFilterExpression: { status: 'PENDING' } });

@@ -25,3 +25,12 @@ export const uploadLimiter = rateLimit({
   legacyHeaders: false,
   message: jsonMessage('Too many uploads, please try again later'),
 });
+
+export const searchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id ?? 'anonymous',
+  message: jsonMessage('Too many searches, please try again later'),
+});

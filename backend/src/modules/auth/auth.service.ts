@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { AppError } from '../../shared/errors/AppError.js';
 import { toSafeUser, User, type SafeUser } from '../users/user.model.js';
 import { PASSWORD_HASH_COST, findUserByEmailWithPassword } from '../users/user.service.js';

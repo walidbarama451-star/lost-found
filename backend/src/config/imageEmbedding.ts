@@ -38,7 +38,7 @@ export async function embedImage(buffer: Buffer, mimeType: string): Promise<Imag
         'Content-Type': mimeType,
         'x-wait-for-model': 'true',
       },
-      body: new Uint8Array(buffer),
+      body: buffer,
       signal: controller.signal,
     });
 

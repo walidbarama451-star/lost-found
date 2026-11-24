@@ -1,8 +1,8 @@
 import type { FilterQuery } from 'mongoose';
-import { deleteImage, storeImage } from '../../config/imageStorage.js';
-import { embedImage } from '../../config/imageEmbedding.js';
+import { deleteImage } from '../../config/imageStorage.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
+import { storeImagesWithEmbeddings } from '../../shared/utils/storeImagesWithEmbeddings.js';
 import { LostReport } from '../lostReports/lostReport.model.js';
 import { Claim } from '../claims/claim.model.js';
 import { asPopulated, toOwnerItem, toPublicItem, type ItemDto } from './item.dto.js';
@@ -12,18 +12,6 @@ import type { CreateItemInput, MyItemsQuery, UpdateItemInput } from './item.sche
 interface ItemListResult {
   items: ItemDto[];
   pagination: ReturnType<typeof buildPaginationMeta>;
-}
-
-async function storeImages(
-  files: Express.Multer.File[],
-): Promise<{ url: string; publicId: string; embedding?: number[] }[]> {
-  const stored: { url: string; publicId: string; embedding?: number[] }[] = [];
-  for (const file of files) {
-    const image = await storeImage(file.buffer, file.mimetype);
-    const embedding = await embedImage(file.buffer, file.mimetype);
-    stored.push(embedding ? { ...image, embedding } : image);
-  }
-  return stored;
 }
 
 export async function listMyItems(userId: string, query: MyItemsQuery): Promise<ItemListResult> {
@@ -87,7 +75,7 @@ export async function createItem(
     throw AppError.badRequest('At least one image is required');
   }
 
-  const uploaded = await storeImages(files);
+  const uploaded = await storeImagesWithEmbeddings(files);
   try {
     const doc = await Item.create({
       title: input.title,
@@ -179,7 +167,7 @@ export async function addImages(
   if (existing.images.length + files.length > 5)
     throw AppError.conflict('A listing can have at most 5 images');
 
-  const uploaded = await storeImages(files);
+  const uploaded = await storeImagesWithEmbeddings(files);
   try {
     const doc = await Item.findOneAndUpdate(
       { _id: itemId, createdBy: userId },

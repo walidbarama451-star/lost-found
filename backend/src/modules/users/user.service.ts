@@ -1,4 +1,6 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
+import type { Types } from 'mongoose';
+import { env } from '../../config/env.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { parseObjectId } from '../../shared/utils/objectId.js';
 import {
@@ -8,17 +10,55 @@ import {
   type PublicUser,
   type SafeUser,
   type UserDoc,
+  type UserRecord,
 } from './user.model.js';
 import type { UpdateProfileInput } from './user.schema.js';
 
-export const PASSWORD_HASH_COST = 12;
+export const PASSWORD_HASH_COST = env.bcryptCost;
+
+export type AuthUserRecord = Pick<UserRecord, 'username' | 'email' | 'role'> & {
+  _id: Types.ObjectId;
+};
+
+export interface CachedAuthUser {
+  user: AuthUserRecord;
+  expiresAt: number;
+}
+
+const authUserCache = new Map<string, CachedAuthUser>();
+
+export function getAuthUserCacheSize(): number {
+  return authUserCache.size;
+}
+
+export function invalidateAuthUserCache(userId?: string): void {
+  if (userId) {
+    authUserCache.delete(userId);
+  } else {
+    authUserCache.clear();
+  }
+}
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, PASSWORD_HASH_COST);
 }
 
-export async function findUserById(id: string): Promise<UserDoc | null> {
-  return User.findById(id);
+export async function findUserById(id: string, ttlMs = env.userCacheTtlMs): Promise<AuthUserRecord | null> {
+  const now = Date.now();
+  const cached = authUserCache.get(id);
+  if (cached && cached.expiresAt > now) {
+    return cached.user;
+  }
+
+  const user = await User.findById(id).select('_id username email role').lean<AuthUserRecord>();
+  if (user) {
+    if (ttlMs > 0) {
+      authUserCache.set(id, { user, expiresAt: now + ttlMs });
+    }
+  } else {
+    authUserCache.delete(id);
+  }
+  return user;
 }
 
 export async function findUserByEmailWithPassword(email: string): Promise<UserDoc | null> {
@@ -60,5 +100,6 @@ export async function updateProfile(userId: string, patch: UpdateProfileInput): 
     { new: true, runValidators: true },
   );
   if (!user) throw AppError.notFound('User not found');
+  invalidateAuthUserCache(userId);
   return toSafeUser(user);
 }

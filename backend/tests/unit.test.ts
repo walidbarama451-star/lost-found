@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { escapeRegex } from '../src/shared/utils/escapeRegex.js';
 import { buildPaginationMeta, MAX_LIMIT, parsePagination } from '../src/shared/utils/pagination.js';
 import { sniffImageType } from '../src/middleware/upload.js';
-import { cosineSimilarity, textOverlap, textSimilarity } from '../src/shared/utils/similarity.js';
+import { cosineSimilarity, dotProduct, isNormalized, normalizeVector, textOverlap, textSimilarity } from '../src/shared/utils/similarity.js';
 
 describe('parsePagination', () => {
   it('applies defaults', () => {
@@ -52,6 +52,34 @@ describe('cosineSimilarity', () => {
   });
 });
 
+describe('normalizeVector', () => {
+  it('returns a unit-length vector and preserves direction', () => {
+    const normalized = normalizeVector([3, 4]);
+    expect(normalized[0]).toBeCloseTo(0.6);
+    expect(normalized[1]).toBeCloseTo(0.8);
+    expect(isNormalized(normalized)).toBe(true);
+  });
+
+  it('handles zero and degenerate vectors', () => {
+    expect(normalizeVector([])).toEqual([]);
+    expect(normalizeVector([0, 0])).toEqual([0, 0]);
+    expect(isNormalized([0, 0])).toBe(false);
+  });
+});
+
+describe('dotProduct', () => {
+  it('equals cosine similarity for normalized vectors', () => {
+    const a = normalizeVector([2, 2, 1]);
+    const b = normalizeVector([1, 3, 2]);
+    expect(dotProduct(a, b)).toBeCloseTo(cosineSimilarity(a, b));
+  });
+
+  it('handles mismatched and empty vectors', () => {
+    expect(dotProduct([], [])).toBe(0);
+    expect(dotProduct([1, 2], [1, 2, 3])).toBe(0);
+  });
+});
+
 describe('textOverlap', () => {
   it('scores identical wording as 1 and ignores stopwords', () => {
     const text = 'Black leather wallet found near the library entrance';
@@ -98,5 +126,57 @@ describe('sniffImageType', () => {
     expect(sniffImageType(Buffer.from('%PDF-1.7'))).toBeNull();
     expect(sniffImageType(Buffer.alloc(0))).toBeNull();
     expect(sniffImageType(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'))).toBeNull();
+  });
+});
+
+describe('authUserCache', () => {
+  it('caches findUserById lookups and supports invalidation', async () => {
+    const { User } = await import('../src/modules/users/user.model.js');
+    const { findUserById, getAuthUserCacheSize, invalidateAuthUserCache } = await import(
+      '../src/modules/users/user.service.js'
+    );
+    const { Types } = await import('mongoose');
+
+    const fakeId = new Types.ObjectId().toString();
+    const fakeUser = {
+      _id: new Types.ObjectId(fakeId),
+      username: 'cachetest',
+      email: 'cache@example.com',
+      role: 'USER',
+    };
+
+    const spy = vi.spyOn(User, 'findById').mockReturnValue({
+      select: () => ({
+        lean: () => Promise.resolve(fakeUser),
+      }),
+    } as unknown as ReturnType<typeof User.findById>);
+
+    try {
+      invalidateAuthUserCache();
+      expect(getAuthUserCacheSize()).toBe(0);
+
+      // First call hits the mock
+      const user1 = await findUserById(fakeId, 5000);
+      expect(user1).toEqual(fakeUser);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(getAuthUserCacheSize()).toBe(1);
+
+      // Second call hits in-memory cache without calling User.findById
+      const user2 = await findUserById(fakeId, 5000);
+      expect(user2).toEqual(fakeUser);
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      // Invalidation evicts from cache
+      invalidateAuthUserCache(fakeId);
+      expect(getAuthUserCacheSize()).toBe(0);
+
+      // Third call hits DB query again
+      const user3 = await findUserById(fakeId, 5000);
+      expect(user3).toEqual(fakeUser);
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally {
+      spy.mockRestore();
+      invalidateAuthUserCache();
+    }
   });
 });

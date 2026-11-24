@@ -28,11 +28,11 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
 
   if (error instanceof MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
-      res.status(413).json({ success: false, message: 'Each image must be 5 MB or smaller', errors: [] });
+      res.status(413).json({ success: false, message: 'Each image must be 3 MB or smaller', errors: [] });
       return;
     }
     if (error.code === 'LIMIT_FILE_COUNT') {
-      res.status(400).json({ success: false, message: 'A listing can have at most 5 images', errors: [] });
+      res.status(400).json({ success: false, message: 'Too many images were uploaded', errors: [] });
       return;
     }
     res.status(400).json({ success: false, message: 'Invalid file upload', errors: [] });

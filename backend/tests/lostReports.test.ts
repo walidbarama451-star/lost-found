@@ -141,6 +141,24 @@ describe('lost report creation and photo matching', () => {
     expect(res.status).toBe(201);
     expect(res.body.data.report.matches).toHaveLength(0);
   });
+
+  it('caps the number of candidate items loaded for matching', async () => {
+    const finder = await registerUser({ email: 'finder@example.com' });
+    const searcher = await registerUser({ email: 'searcher@example.com' });
+
+    for (let index = 0; index < 3; index += 1) {
+      await createItem(finder, { title: `Black wallet ${index}` });
+    }
+
+    vi.stubEnv('MATCH_CANDIDATE_LIMIT', '2');
+    try {
+      const res = await createLostReport(searcher, { title: 'Black wallet' });
+      expect(res.status).toBe(201);
+      expect(res.body.data.report.matches).toHaveLength(2);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });
 
 describe('lost report search lifecycle', () => {

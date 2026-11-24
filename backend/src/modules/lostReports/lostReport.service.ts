@@ -1,10 +1,12 @@
 import { Types as ObjectIdTypes } from 'mongoose';
+import { env } from '../../config/env.js';
+import { deleteImage } from '../../config/imageStorage.js';
 import type { ItemDoc } from '../items/item.model.js';
 import { Item } from '../items/item.model.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
-import { deleteImage, storeImage } from '../../config/imageStorage.js';
-import { embedImage } from '../../config/imageEmbedding.js';
+import { normalizeIfNeeded } from '../../shared/utils/similarity.js';
+import { storeImagesWithEmbeddings } from '../../shared/utils/storeImagesWithEmbeddings.js';
 import { computeMatches, type MatchCandidate } from './matcher.js';
 import { LostReport, type LostReportDoc } from './lostReport.model.js';
 import { toLostReportDto, type LostReportDto } from './lostReport.dto.js';
@@ -15,6 +17,13 @@ import type {
 } from './lostReport.schema.js';
 
 const MAX_MATCHES_STORED = 50;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+interface CandidateDocument {
+  _id: ObjectIdTypes.ObjectId;
+  title: string;
+  images: { embedding?: number[] }[];
+}
 
 interface LostReportListResult {
   reports: LostReportDto[];
@@ -25,46 +34,42 @@ function loadOwnedReport(reportId: string, userId: string): Promise<LostReportDo
   return LostReport.findOne({ _id: reportId, owner: userId }).select('+images.embedding');
 }
 
-async function storePhotos(
-  files: Express.Multer.File[],
-): Promise<{ url: string; publicId: string; embedding?: number[] }[]> {
-  const stored: { url: string; publicId: string; embedding?: number[] }[] = [];
-  for (const file of files) {
-    const image = await storeImage(file.buffer, file.mimetype);
-    const embedding = await embedImage(file.buffer, file.mimetype);
-    stored.push(embedding ? { ...image, embedding } : image);
+async function loadCandidates(ownerId: string): Promise<MatchCandidate[]> {
+  const filter: Record<string, unknown> = {
+    status: 'ACTIVE',
+    createdBy: { $ne: ownerId },
+  };
+
+  const lookbackDays = env.matchLookbackDays;
+  if (lookbackDays > 0) {
+    filter.createdAt = { $gte: new Date(Date.now() - lookbackDays * DAY_MS) };
   }
-  return stored;
-}
 
-async function loadCandidates(ownerId: string): Promise<{ docs: ItemDoc[]; candidates: MatchCandidate[] }> {
-  const docs = (await Item.find({ status: 'ACTIVE', createdBy: { $ne: ownerId } }).select(
-    '+images.embedding',
-  )) as ItemDoc[];
+  const docs = (await Item.find(filter)
+    .select('title images.embedding')
+    .sort({ createdAt: -1 })
+    .limit(env.matchCandidateLimit)
+    .lean()) as unknown as CandidateDocument[];
 
-  const candidates: MatchCandidate[] = docs.map((doc) => ({
+  return docs.map((doc) => ({
     itemId: doc._id.toString(),
     title: doc.title,
     imageEmbeddings: doc.images
       .map((image) => image.embedding)
-      .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0),
+      .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0)
+      .map((vector) => normalizeIfNeeded(vector)),
   }));
-
-  return { docs, candidates };
 }
 
 async function runSearch(report: LostReportDoc): Promise<LostReportDoc> {
-  const { docs, candidates } = await loadCandidates(String(report.owner));
-
   const reportEmbeddings = report.images
     .map((image) => image.embedding)
-    .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0);
+    .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0)
+    .map((vector) => normalizeIfNeeded(vector));
 
-  const matches = computeMatches(
-    report.title,
-    reportEmbeddings,
-    candidates,
-  );
+  const candidates = await loadCandidates(String(report.owner));
+
+  const matches = computeMatches(report.title, reportEmbeddings, candidates);
 
   report.matches = matches.map((match) => ({
     item: new ObjectIdTypes.ObjectId(match.itemId),
@@ -96,7 +101,7 @@ export async function createLostReport(
     throw AppError.badRequest('At least one photo of your lost item is required');
   }
 
-  const uploaded = await storePhotos(files);
+  const uploaded = await storeImagesWithEmbeddings(files);
   try {
     const report = await LostReport.create({
       owner: userId,

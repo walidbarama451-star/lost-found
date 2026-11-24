@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/authenticate.js';
 import { uploadLimiter } from '../../middleware/rateLimit.js';
-import { assertImageContent, uploadImages } from '../../middleware/upload.js';
+import { assertImageContent, assertTotalUploadSize, uploadImages } from '../../middleware/upload.js';
 import { validate } from '../../middleware/validate.js';
 import { getItemClaims } from '../claims/claim.controller.js';
 import {
@@ -31,6 +31,7 @@ itemsRouter.post(
   authenticate,
   uploadLimiter,
   uploadImages.array('images', 5),
+  assertTotalUploadSize,
   assertImageContent,
   validate(createItemSchema, 'body'),
   postItem,
@@ -45,6 +46,7 @@ itemsRouter.post(
   authenticate,
   uploadLimiter,
   uploadImages.array('images', 5),
+  assertTotalUploadSize,
   assertImageContent,
   postImages,
 );

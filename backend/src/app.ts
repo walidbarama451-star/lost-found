@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
@@ -35,6 +36,7 @@ export function createApp(): Express {
   app.disable('x-powered-by');
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  app.use(compression());
 
   app.use(
     cors({
