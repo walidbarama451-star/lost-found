@@ -28,15 +28,22 @@ export interface CachedCandidate {
   imageEmbeddings: readonly (readonly number[])[];
 }
 
-let cachedCandidatePool: { loadedAt: number; candidates: CachedCandidate[] } | null = null;
+let poolVersion = 0;
+let cachedCandidatePool: { loadedAt: number; version: number; candidates: CachedCandidate[] } | null = null;
+let inFlightPoolPromise: Promise<CachedCandidate[]> | null = null;
 
 export function invalidateCandidatePool(): void {
+  poolVersion += 1;
   cachedCandidatePool = null;
 }
 
-export function getCandidatePoolCacheStatus(): { loadedAt: number; count: number } | null {
+export function getCandidatePoolCacheStatus(): { loadedAt: number; version: number; count: number } | null {
   return cachedCandidatePool
-    ? { loadedAt: cachedCandidatePool.loadedAt, count: cachedCandidatePool.candidates.length }
+    ? {
+        loadedAt: cachedCandidatePool.loadedAt,
+        version: cachedCandidatePool.version,
+        count: cachedCandidatePool.candidates.length,
+      }
     : null;
 }
 
@@ -49,12 +56,7 @@ function loadOwnedReport(reportId: string, userId: string): Promise<LostReportDo
   return LostReport.findOne({ _id: reportId, owner: userId }).select('+images.embedding');
 }
 
-async function loadCandidatePool(): Promise<CachedCandidate[]> {
-  const now = Date.now();
-  if (cachedCandidatePool && now - cachedCandidatePool.loadedAt < CANDIDATE_CACHE_TTL_MS) {
-    return cachedCandidatePool.candidates;
-  }
-
+async function fetchPoolFromDb(startedVersion: number): Promise<CachedCandidate[]> {
   const docs = (await Item.find({ status: 'ACTIVE' })
     .select('+images.embedding _id createdBy title createdAt')
     .sort({ createdAt: -1 })
@@ -78,8 +80,29 @@ async function loadCandidatePool(): Promise<CachedCandidate[]> {
       .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0),
   }));
 
-  cachedCandidatePool = { loadedAt: now, candidates };
+  // Stale write-back prevention: only cache if no invalidation occurred during fetch
+  if (poolVersion === startedVersion) {
+    cachedCandidatePool = { loadedAt: Date.now(), version: startedVersion, candidates };
+  }
+
   return candidates;
+}
+
+export function loadCandidatePool(): Promise<CachedCandidate[]> {
+  const now = Date.now();
+  if (cachedCandidatePool && now - cachedCandidatePool.loadedAt < CANDIDATE_CACHE_TTL_MS) {
+    return Promise.resolve(cachedCandidatePool.candidates);
+  }
+
+  // Single-flight: coalesce concurrent requests into a single in-flight promise
+  if (!inFlightPoolPromise) {
+    const versionAtStart = poolVersion;
+    inFlightPoolPromise = fetchPoolFromDb(versionAtStart).finally(() => {
+      inFlightPoolPromise = null;
+    });
+  }
+
+  return inFlightPoolPromise;
 }
 
 async function loadCandidates(ownerId: string): Promise<MatchCandidate[]> {

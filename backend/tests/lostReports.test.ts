@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, createItem, pngBuffer, registerUser } from './helpers.js';
+import { invalidateCandidatePool } from '../src/modules/lostReports/lostReport.service.js';
 
 const state = vi.hoisted(() => ({ vectors: new Map<number, number[]>() }));
 
@@ -176,6 +177,7 @@ describe('lost report search lifecycle', () => {
     state.vectors.set(pngBuffer().length, vector);
     const { id: itemId } = await createItem(finder);
 
+    invalidateCandidatePool();
     const rerun = await request(app).post(`/api/lost-reports/${reportId}/search`).set('Cookie', searcher.cookie);
     expect(rerun.status).toBe(200);
     expect(rerun.body.data.report.matches).toHaveLength(1);

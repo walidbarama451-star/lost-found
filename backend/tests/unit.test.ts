@@ -180,7 +180,7 @@ describe('authUserCache', () => {
     }
   });
 
-  it('prunes expired entries when cache capacity is reached', async () => {
+  it('enforces MAX_AUTH_USER_CACHE_SIZE capacity when inserting 5,001 entries', async () => {
     const { User } = await import('../src/modules/users/user.model.js');
     const { findUserById, getAuthUserCacheSize, invalidateAuthUserCache, MAX_AUTH_USER_CACHE_SIZE } = await import(
       '../src/modules/users/user.service.js'
@@ -202,21 +202,116 @@ describe('authUserCache', () => {
 
     try {
       expect(MAX_AUTH_USER_CACHE_SIZE).toBe(5000);
-      const id1 = new Types.ObjectId().toString();
-      // Add entry with 1ms TTL (will expire immediately)
-      await findUserById(id1, 1);
-      expect(getAuthUserCacheSize()).toBe(1);
+      for (let index = 0; index <= MAX_AUTH_USER_CACHE_SIZE; index += 1) {
+        const id = new Types.ObjectId().toString();
+        await findUserById(id, 60_000);
+      }
 
-      // Wait 10ms so it expires
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      const id2 = new Types.ObjectId().toString();
-      await findUserById(id2, 10000);
-      // id1 was expired, so accessing id2 should maintain healthy cache
-      expect(getAuthUserCacheSize()).toBeGreaterThanOrEqual(1);
+      expect(getAuthUserCacheSize()).toBe(MAX_AUTH_USER_CACHE_SIZE);
     } finally {
       spy.mockRestore();
       invalidateAuthUserCache();
+    }
+  });
+});
+
+describe('candidatePool', () => {
+  it('coalesces concurrent loadCandidatePool calls into a single database query', async () => {
+    const { Item } = await import('../src/modules/items/item.model.js');
+    const { loadCandidatePool, invalidateCandidatePool } = await import(
+      '../src/modules/lostReports/lostReport.service.js'
+    );
+    const { Types } = await import('mongoose');
+
+    invalidateCandidatePool();
+
+    let queryCount = 0;
+    const fakeDoc = {
+      _id: new Types.ObjectId(),
+      createdBy: new Types.ObjectId(),
+      title: 'Shared Item',
+      createdAt: new Date(),
+      images: [{ embedding: [0.5, 0.5] }],
+    };
+
+    const spy = vi.spyOn(Item, 'find').mockImplementation((() => {
+      queryCount += 1;
+      return {
+        select: () => ({
+          sort: () => ({
+            limit: () => ({
+              lean: () =>
+                new Promise((resolve) => {
+                  setTimeout(() => resolve([fakeDoc]), 20);
+                }),
+            }),
+          }),
+        }),
+      };
+    }) as unknown as typeof Item.find);
+
+    try {
+      const results = await Promise.all([
+        loadCandidatePool(),
+        loadCandidatePool(),
+        loadCandidatePool(),
+        loadCandidatePool(),
+        loadCandidatePool(),
+      ]);
+
+      expect(queryCount).toBe(1);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(results[0]).toHaveLength(1);
+      expect(results[0]?.[0]?.title).toBe('Shared Item');
+    } finally {
+      spy.mockRestore();
+      invalidateCandidatePool();
+    }
+  });
+
+  it('prevents stale write-back if an invalidation occurs while fetching', async () => {
+    const { Item } = await import('../src/modules/items/item.model.js');
+    const { loadCandidatePool, invalidateCandidatePool, getCandidatePoolCacheStatus } = await import(
+      '../src/modules/lostReports/lostReport.service.js'
+    );
+    const { Types } = await import('mongoose');
+
+    invalidateCandidatePool();
+
+    const fakeDoc = {
+      _id: new Types.ObjectId(),
+      createdBy: new Types.ObjectId(),
+      title: 'Stale Item',
+      createdAt: new Date(),
+      images: [{ embedding: [0.1, 0.2] }],
+    };
+
+    let resolveQuery: (val: unknown) => void = () => {};
+    const queryPromise = new Promise((resolve) => {
+      resolveQuery = resolve;
+    });
+
+    const spy = vi.spyOn(Item, 'find').mockImplementation((() => ({
+      select: () => ({
+        sort: () => ({
+          limit: () => ({
+            lean: () => queryPromise,
+          }),
+        }),
+      }),
+    })) as unknown as typeof Item.find);
+
+    try {
+      const inFlight = loadCandidatePool();
+      invalidateCandidatePool();
+
+      resolveQuery([fakeDoc]);
+      await inFlight;
+
+      expect(getCandidatePoolCacheStatus()).toBeNull();
+    } finally {
+      spy.mockRestore();
+      invalidateCandidatePool();
     }
   });
 });

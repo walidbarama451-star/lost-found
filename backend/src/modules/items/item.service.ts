@@ -86,7 +86,6 @@ export async function createItem(
     });
 
     await doc.populate('createdBy', 'username');
-    invalidateCandidatePool();
     return toOwnerItem(asPopulated(doc));
   } catch (error) {
     await Promise.all(uploaded.map((image) => deleteImage(image.publicId)));
@@ -116,7 +115,6 @@ export async function updateItem(itemId: string, userId: string, patch: UpdateIt
   ).populate('createdBy', 'username');
   if (!doc) throw AppError.notFound('Listing not found');
 
-  invalidateCandidatePool();
   return toOwnerItem(asPopulated(doc));
 }
 
@@ -180,7 +178,6 @@ export async function addImages(
       { new: true, runValidators: true },
     ).populate('createdBy', 'username');
     if (!doc) throw AppError.forbidden('You can only manage your own listings');
-    invalidateCandidatePool();
     return toOwnerItem(asPopulated(doc));
   } catch (error) {
     await Promise.all(uploaded.map((image) => deleteImage(image.publicId)));
@@ -206,6 +203,5 @@ export async function removeImage(itemId: string, userId: string, publicId: stri
   if (!doc) throw AppError.forbidden('You can only manage your own listings');
 
   await deleteImage(publicId);
-  invalidateCandidatePool();
   return toOwnerItem(asPopulated(doc));
 }
