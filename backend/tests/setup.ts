@@ -11,6 +11,8 @@ process.env.CLIENT_URL = 'http://localhost:5173';
 process.env.IMAGE_STORAGE = 'local';
 process.env.UPLOAD_DIR = 'uploads';
 
-afterEach(() => {
+afterEach(async () => {
   invalidateAuthUserCache();
+  const { invalidateCandidatePool } = await import('../src/modules/lostReports/lostReport.service.js');
+  invalidateCandidatePool();
 });

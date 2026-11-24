@@ -35,7 +35,16 @@ export interface SafeUser {
   createdAt: Date;
 }
 
-export function toSafeUser(user: UserDoc): SafeUser {
+export type SafeUserSource = Pick<
+  UserRecord,
+  'username' | 'email' | 'createdAt'
+> & {
+  _id: Types.ObjectId | string;
+  discordUsername?: string;
+  phone?: string;
+};
+
+export function toSafeUser(user: SafeUserSource): SafeUser {
   const safe: SafeUser = {
     id: user._id.toString(),
     username: user.username,
@@ -54,7 +63,12 @@ export interface PublicUser {
   createdAt: Date;
 }
 
-export function toPublicUser(user: UserDoc): PublicUser {
+export type PublicUserSource = Pick<UserRecord, 'username' | 'createdAt'> & {
+  _id: Types.ObjectId | string;
+  discordUsername?: string;
+};
+
+export function toPublicUser(user: PublicUserSource): PublicUser {
   const pub: PublicUser = {
     id: user._id.toString(),
     username: user.username,

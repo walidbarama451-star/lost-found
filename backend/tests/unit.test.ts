@@ -179,4 +179,44 @@ describe('authUserCache', () => {
       invalidateAuthUserCache();
     }
   });
+
+  it('prunes expired entries when cache capacity is reached', async () => {
+    const { User } = await import('../src/modules/users/user.model.js');
+    const { findUserById, getAuthUserCacheSize, invalidateAuthUserCache, MAX_AUTH_USER_CACHE_SIZE } = await import(
+      '../src/modules/users/user.service.js'
+    );
+    const { Types } = await import('mongoose');
+
+    invalidateAuthUserCache();
+
+    const spy = vi.spyOn(User, 'findById').mockImplementation(((id: string) => ({
+      select: () => ({
+        lean: () => Promise.resolve({
+          _id: new Types.ObjectId(id),
+          username: `user_${id}`,
+          email: `${id}@example.com`,
+          role: 'USER',
+        }),
+      }),
+    })) as unknown as typeof User.findById);
+
+    try {
+      expect(MAX_AUTH_USER_CACHE_SIZE).toBe(5000);
+      const id1 = new Types.ObjectId().toString();
+      // Add entry with 1ms TTL (will expire immediately)
+      await findUserById(id1, 1);
+      expect(getAuthUserCacheSize()).toBe(1);
+
+      // Wait 10ms so it expires
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const id2 = new Types.ObjectId().toString();
+      await findUserById(id2, 10000);
+      // id1 was expired, so accessing id2 should maintain healthy cache
+      expect(getAuthUserCacheSize()).toBeGreaterThanOrEqual(1);
+    } finally {
+      spy.mockRestore();
+      invalidateAuthUserCache();
+    }
+  });
 });

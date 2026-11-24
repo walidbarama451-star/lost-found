@@ -25,10 +25,22 @@ export interface CachedAuthUser {
   expiresAt: number;
 }
 
+export const MAX_AUTH_USER_CACHE_SIZE = 5_000;
 const authUserCache = new Map<string, CachedAuthUser>();
 
 export function getAuthUserCacheSize(): number {
   return authUserCache.size;
+}
+
+function pruneExpiredOrOldest(): void {
+  const now = Date.now();
+  for (const [key, value] of authUserCache.entries()) {
+    if (value.expiresAt <= now) authUserCache.delete(key);
+  }
+  if (authUserCache.size >= MAX_AUTH_USER_CACHE_SIZE) {
+    const oldestKey = authUserCache.keys().next().value;
+    if (oldestKey !== undefined) authUserCache.delete(oldestKey);
+  }
 }
 
 export function invalidateAuthUserCache(userId?: string): void {
@@ -53,6 +65,9 @@ export async function findUserById(id: string, ttlMs = env.userCacheTtlMs): Prom
   const user = await User.findById(id).select('_id username email role').lean<AuthUserRecord>();
   if (user) {
     if (ttlMs > 0) {
+      if (authUserCache.size >= MAX_AUTH_USER_CACHE_SIZE) {
+        pruneExpiredOrOldest();
+      }
       authUserCache.set(id, { user, expiresAt: now + ttlMs });
     }
   } else {

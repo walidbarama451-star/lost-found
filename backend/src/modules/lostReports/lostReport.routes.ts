@@ -23,6 +23,7 @@ lostReportsRouter.use(authenticate);
 
 lostReportsRouter.post(
   '/',
+  searchLimiter,
   uploadLimiter,
   uploadImages.array('images', 3),
   assertTotalUploadSize,

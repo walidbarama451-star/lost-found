@@ -5,11 +5,28 @@ import { Item } from '../modules/items/item.model.js';
 /**
  * MongoDB Atlas Vector Search Index Configuration.
  *
- * For production deployments on MongoDB Atlas:
- * 1. Log in to MongoDB Atlas -> Database -> Search.
- * 2. Click "Create Search Index" -> "Atlas Vector Search - JSON Editor".
- * 3. Choose database and collection "items".
- * 4. Paste the index definition below.
+ * IMPORTANT ARCHITECTURAL NOTE:
+ * MongoDB Atlas Vector Search ($vectorSearch) does NOT support indexing vector
+ * fields that are nested within an array of subdocuments (such as `images.embedding`).
+ * Atlas Vector Search requires `path` to point directly to a field containing
+ * a single array of numbers.
+ *
+ * For production deployment with Atlas Vector Search, choose between two architectures:
+ *
+ * OPTION A (Recommended for multi-image listings):
+ * Create a dedicated collection, e.g. `item_embeddings`:
+ * {
+ *   _id: ObjectId,
+ *   itemId: ObjectId,
+ *   embedding: number[], // 512-dim unit vector
+ *   status: "ACTIVE",
+ *   createdBy: ObjectId
+ * }
+ * In Atlas, create the index on collection `item_embeddings` with path: "embedding".
+ *
+ * OPTION B (Single primary vector per item):
+ * Add a root-level `primaryEmbedding: number[]` to the `Item` document.
+ * In Atlas, create the index on collection `items` with path: "primaryEmbedding".
  */
 export const ATLAS_VECTOR_INDEX_NAME = 'vector_index';
 
@@ -20,7 +37,7 @@ export const ATLAS_VECTOR_INDEX_SPEC = {
     fields: [
       {
         type: 'vector',
-        path: 'images.embedding',
+        path: 'primaryEmbedding', // Root-level vector path required by Atlas Search
         numDimensions: 512,
         similarity: 'dotProduct',
       },
@@ -62,9 +79,11 @@ async function main(): Promise<void> {
       }
     } else {
       console.log(
-        '[Atlas Vector Search] Standard standalone/local MongoDB does not support Atlas Vector Search.\n' +
+        '[Atlas Vector Search] Note: Standalone/local MongoDB does not support Atlas Vector Search.\n' +
           'The in-memory bounded dot-product matching is currently active and fully functional.\n' +
-          'When deploying to MongoDB Atlas, create the following index on collection "items":\n',
+          'Note that Atlas Vector Search requires the vector to be at the root of the document\n' +
+          '(or in a dedicated item_embeddings collection) rather than inside an array of subdocuments.\n' +
+          'Specification template:\n',
         JSON.stringify(ATLAS_VECTOR_INDEX_SPEC, null, 2),
       );
     }

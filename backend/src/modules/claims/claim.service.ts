@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
 import { Item } from '../items/item.model.js';
+import { invalidateCandidatePool } from '../lostReports/lostReport.service.js';
 import { toClaimOnItemDto, toMyClaimDto, type ClaimOnItemDto, type MyClaimDto } from './claim.dto.js';
 import { Claim, type ClaimDoc, type ClaimRecord } from './claim.model.js';
 
@@ -135,6 +136,8 @@ export async function decideClaim(
     );
     throw AppError.conflict('This listing can no longer be claimed');
   }
+
+  invalidateCandidatePool();
 
   return { id: accepted._id.toString(), status: accepted.status };
 }

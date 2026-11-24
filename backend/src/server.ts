@@ -1,3 +1,8 @@
+// Scale libuv worker thread pool for concurrent sharp (libvips) and native bcrypt hashing
+if (!process.env.UV_THREADPOOL_SIZE) {
+  process.env.UV_THREADPOOL_SIZE = '8';
+}
+
 import mongoose from 'mongoose';
 import { createApp } from './app.js';
 import { connectDatabase } from './config/database.js';

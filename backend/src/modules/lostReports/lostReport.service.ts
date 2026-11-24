@@ -18,11 +18,26 @@ import type {
 
 const MAX_MATCHES_STORED = 50;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const CANDIDATE_CACHE_TTL_MS = 60_000;
 
-interface CandidateDocument {
-  _id: ObjectIdTypes.ObjectId;
+export interface CachedCandidate {
+  itemId: string;
+  ownerId: string;
   title: string;
-  images: { embedding?: number[] }[];
+  createdAt: Date;
+  imageEmbeddings: readonly (readonly number[])[];
+}
+
+let cachedCandidatePool: { loadedAt: number; candidates: CachedCandidate[] } | null = null;
+
+export function invalidateCandidatePool(): void {
+  cachedCandidatePool = null;
+}
+
+export function getCandidatePoolCacheStatus(): { loadedAt: number; count: number } | null {
+  return cachedCandidatePool
+    ? { loadedAt: cachedCandidatePool.loadedAt, count: cachedCandidatePool.candidates.length }
+    : null;
 }
 
 interface LostReportListResult {
@@ -34,31 +49,51 @@ function loadOwnedReport(reportId: string, userId: string): Promise<LostReportDo
   return LostReport.findOne({ _id: reportId, owner: userId }).select('+images.embedding');
 }
 
-async function loadCandidates(ownerId: string): Promise<MatchCandidate[]> {
-  const filter: Record<string, unknown> = {
-    status: 'ACTIVE',
-    createdBy: { $ne: ownerId },
-  };
-
-  const lookbackDays = env.matchLookbackDays;
-  if (lookbackDays > 0) {
-    filter.createdAt = { $gte: new Date(Date.now() - lookbackDays * DAY_MS) };
+async function loadCandidatePool(): Promise<CachedCandidate[]> {
+  const now = Date.now();
+  if (cachedCandidatePool && now - cachedCandidatePool.loadedAt < CANDIDATE_CACHE_TTL_MS) {
+    return cachedCandidatePool.candidates;
   }
 
-  const docs = (await Item.find(filter)
-    .select('title images.embedding')
+  const docs = (await Item.find({ status: 'ACTIVE' })
+    .select('+images.embedding _id createdBy title createdAt')
     .sort({ createdAt: -1 })
     .limit(env.matchCandidateLimit)
-    .lean()) as unknown as CandidateDocument[];
+    .lean()) as unknown as Array<{
+      _id: ObjectIdTypes.ObjectId;
+      createdBy: ObjectIdTypes.ObjectId | string;
+      title: string;
+      images: { embedding?: number[] }[];
+      createdAt: Date;
+    }>;
 
-  return docs.map((doc) => ({
+  // Stored embeddings are already normalized on upload/backfill; skip redundant normalizeIfNeeded pass
+  const candidates: CachedCandidate[] = docs.map((doc) => ({
     itemId: doc._id.toString(),
+    ownerId: String(doc.createdBy),
     title: doc.title,
+    createdAt: new Date(doc.createdAt),
     imageEmbeddings: doc.images
       .map((image) => image.embedding)
-      .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0)
-      .map((vector) => normalizeIfNeeded(vector)),
+      .filter((vector): vector is number[] => Array.isArray(vector) && vector.length > 0),
   }));
+
+  cachedCandidatePool = { loadedAt: now, candidates };
+  return candidates;
+}
+
+async function loadCandidates(ownerId: string): Promise<MatchCandidate[]> {
+  const pool = await loadCandidatePool();
+  const lookbackDays = env.matchLookbackDays;
+  const cutoff = lookbackDays > 0 ? Date.now() - lookbackDays * DAY_MS : 0;
+
+  return pool
+    .filter((candidate) => candidate.ownerId !== ownerId && (cutoff === 0 || candidate.createdAt.getTime() >= cutoff))
+    .map((candidate) => ({
+      itemId: candidate.itemId,
+      title: candidate.title,
+      imageEmbeddings: candidate.imageEmbeddings,
+    }));
 }
 
 async function runSearch(report: LostReportDoc): Promise<LostReportDoc> {
