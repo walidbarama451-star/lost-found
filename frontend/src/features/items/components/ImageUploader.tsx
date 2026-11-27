@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
-import { ImagePlus, X } from 'lucide-react';
+import { Camera, ImagePlus, X } from 'lucide-react';
 import { buttonClasses } from '@/shared/ui/Button';
 import { errorClass, hintClass } from '@/shared/ui/formStyles';
+import { CameraCaptureModal } from './CameraCaptureModal';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 3 * 1024 * 1024;
@@ -75,6 +76,10 @@ export const ImageUploader = ({
   error,
 }: ImageUploaderProps): ReactNode => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const nativeCameraRef = useRef<HTMLInputElement>(null);
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Preview[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -130,6 +135,26 @@ export const ImageUploader = ({
     }
   };
 
+  const handleCapturedPhoto = async (capturedFile: File) => {
+    if (remaining <= 0) {
+      setLocalError(`You can attach at most ${maxImages} images`);
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const prepared = await prepareImage(capturedFile);
+      if (prepared.size > MAX_FILE_SIZE) {
+        setLocalError('Captured photo could not be compressed below 3 MB.');
+        return;
+      }
+      setLocalError(null);
+      onFilesChange([...files, prepared]);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const removeFile = (index: number) => {
     onFilesChange(files.filter((_, i) => i !== index));
   };
@@ -151,6 +176,7 @@ export const ImageUploader = ({
         JPEG, PNG or WebP · each up to 3 MB. Large photos are resized automatically.
       </p>
 
+      {/* Hidden file input for upload */}
       <input
         ref={inputRef}
         className="sr-only"
@@ -163,18 +189,70 @@ export const ImageUploader = ({
         aria-labelledby="image-uploader-label"
       />
 
-      <div className="rounded-xl border border-dashed border-line bg-canvas p-4">
-        <button
-          type="button"
-          className={buttonClasses('secondary', 'sm')}
-          onClick={() => inputRef.current?.click()}
-          disabled={disabled || processing || remaining <= 0}
-        >
-          <ImagePlus size={15} aria-hidden />
-          {processing ? 'Optimizing…' : 'Add photos'}
-        </button>
+      {/* Hidden file input for native camera fallback */}
+      <input
+        ref={nativeCameraRef}
+        className="sr-only"
+        id="image-uploader-camera-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleChange}
+        disabled={disabled || processing || remaining <= 0}
+        aria-hidden="true"
+      />
+
+      <div className="rounded-xl border border-dashed border-line bg-surface p-4">
+        {!pickerOpen ? (
+          <button
+            type="button"
+            className={buttonClasses('secondary', 'sm')}
+            onClick={() => setPickerOpen(true)}
+            disabled={disabled || processing || remaining <= 0}
+          >
+            <ImagePlus size={15} aria-hidden />
+            {processing ? 'Optimizing…' : 'Upload a photo'}
+          </button>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className={buttonClasses('primary', 'sm')}
+              onClick={() => {
+                setCameraOpen(true);
+                setPickerOpen(false);
+              }}
+            >
+              <Camera size={15} aria-hidden />
+              Take photo
+            </button>
+
+            <button
+              type="button"
+              className={buttonClasses('secondary', 'sm')}
+              onClick={() => {
+                inputRef.current?.click();
+                setPickerOpen(false);
+              }}
+            >
+              <ImagePlus size={15} aria-hidden />
+              Add from files
+            </button>
+
+            <button
+              type="button"
+              className={buttonClasses('ghost', 'sm')}
+              onClick={() => setPickerOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
         <p className="mt-2 text-xs text-ink-faint">
-          {remaining > 0 ? `${remaining} more photo${remaining === 1 ? '' : 's'} allowed.` : 'Photo limit reached.'}
+          {remaining > 0
+            ? `${remaining} more photo${remaining === 1 ? '' : 's'} allowed.`
+            : 'Photo limit reached.'}
         </p>
       </div>
 
@@ -209,6 +287,14 @@ export const ImageUploader = ({
           ))}
         </ul>
       ) : null}
+
+      {/* Live in-app camera viewfinder modal */}
+      <CameraCaptureModal
+        open={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={handleCapturedPhoto}
+        onFallback={() => nativeCameraRef.current?.click()}
+      />
     </div>
   );
 };
