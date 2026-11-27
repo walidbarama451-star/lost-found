@@ -20,6 +20,9 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Reference repo
+__devleaderboard_ref/
+
 # Test coverage
 coverage/
 

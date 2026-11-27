@@ -1,5 +1,5 @@
-import { apiRequest } from '../../lib/api';
-import type { ItemStatus, OwnerItem, Paginated, PublicItem } from '../../types';
+import { apiRequest } from '@/shared/api/client';
+import type { ItemStatus, OwnerItem, Paginated, PublicItem } from '@/shared/api/types';
 
 export interface MyItemsQuery {
   status?: ItemStatus | '';

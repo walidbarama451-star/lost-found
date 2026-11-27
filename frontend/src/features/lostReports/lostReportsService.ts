@@ -1,5 +1,5 @@
-import { apiRequest } from '../../lib/api';
-import type { LostReport, LostReportStatus, Pagination } from '../../types';
+import { apiRequest } from '@/shared/api/client';
+import type { LostReport, LostReportStatus, Pagination } from '@/shared/api/types';
 
 export interface LostReportsQuery {
   status?: LostReportStatus | '';

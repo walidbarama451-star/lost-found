@@ -1,4 +1,4 @@
-import type { OwnerItem } from '../../types';
+import type { OwnerItem } from '@/shared/api/types';
 import { getItem, listMyItems } from './itemsService';
 
 const SCAN_PAGE_SIZE = 50;

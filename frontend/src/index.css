@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens, shared with the Micro Club status page (mc-status):
+ * a lavender paper background, white cards, one blue accent and a navy hero.
+ * Components reference these roles (bg-surface, text-ink-muted, ...) rather than
+ * raw palette numbers, so a palette change stays a one-liner.
+ */
+@theme {
+    --font-sans: "DM Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-display: "DM Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /* Accent: Micro Club blue */
+    --color-accent-50: #eef1fa;
+    --color-accent-100: #e6ecfc;
+    --color-accent-200: #d0dbf8;
+    --color-accent-300: #aabbf0;
+    --color-accent-400: #6f88de;
+    --color-accent-500: #3f58bd;
+    --color-accent-600: #2d46a8;
+    --color-accent-700: #273a83;
+    --color-accent-800: #1f2e6a;
+    --color-accent-900: #191f41;
+    --color-accent-950: #11152e;
+
+    /* Semantic roles */
+    --color-canvas: #eef1fa; /* page background */
+    --color-surface: #ffffff; /* cards */
+    --color-overlay: #e6ecfc; /* hover, inputs, group strips */
+    --color-line: #d7dff0; /* 1px borders */
+
+    --color-ink: #1a2140; /* primary text */
+    --color-ink-muted: #505b77; /* secondary text */
+    --color-ink-faint: #5f6a88; /* hints */
+
+    --color-success: #0c644e;
+    --color-danger: #a82e4a;
+    --color-warning: #805310;
+
+    /* The navy hero card and its inner panel */
+    --color-navy: #191f41;
+    --color-hero-panel: #252d54;
+    --color-hero-line: #45517d;
+    --color-hero-muted: #d1d9fa;
+}
+
+@layer base {
+    html {
+        color-scheme: light;
+    }
+
+    body {
+        background-color: var(--color-canvas);
+        color: var(--color-ink);
+        font-family: var(--font-sans);
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Scores, ranks and counts must never shift width while updating. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    ::selection {
+        background-color: var(--color-accent-200);
+        color: var(--color-ink);
+    }
+}

@@ -1,5 +1,5 @@
-import { apiRequest } from '../../lib/api';
-import type { PublicUser, User } from '../../types';
+import { apiRequest } from '@/shared/api/client';
+import type { PublicUser, User } from '@/shared/api/types';
 
 export interface ProfilePatch {
   username?: string;

@@ -1,5 +1,5 @@
-import { apiRequest } from '../../lib/api';
-import type { ClaimOnItem, MyClaim, Paginated } from '../../types';
+import { apiRequest } from '@/shared/api/client';
+import type { ClaimOnItem, MyClaim, Paginated } from '@/shared/api/types';
 
 export async function submitClaim(itemId: string, message: string): Promise<ClaimOnItem> {
   const data = await apiRequest<{ claim: ClaimOnItem }>('/claims', {

@@ -8,8 +8,8 @@ import {
   type ReactNode,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setUnauthorizedHandler } from '../../lib/api';
-import type { User } from '../../types';
+import { setUnauthorizedHandler } from '@/shared/api/client';
+import type { User } from '@/shared/api/types';
 import { fetchCurrentUser, loginUser, logoutUser, registerUser } from './authService';
 import type { LoginInput, RegisterInput } from './authSchemas';
 

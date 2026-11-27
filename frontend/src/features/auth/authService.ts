@@ -1,5 +1,5 @@
-import { apiRequest } from '../../lib/api';
-import type { User } from '../../types';
+import { apiRequest } from '@/shared/api/client';
+import type { User } from '@/shared/api/types';
 import type { LoginInput, RegisterInput } from './authSchemas';
 
 export async function registerUser(input: RegisterInput): Promise<User> {

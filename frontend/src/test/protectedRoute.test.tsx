@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import ProtectedRoute from '../components/ProtectedRoute';
-import { AuthProvider } from '../features/auth/AuthContext';
-import type { User } from '../types';
+import { ProtectedRoute } from '@/app/ProtectedRoute';
+import { AuthProvider } from '@/features/auth/AuthContext';
+import type { User } from '@/shared/api/types';
 
 const USER: User = {
   id: 'u1',

@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import TopNav from '../components/TopNav';
-import { AuthProvider } from '../features/auth/AuthContext';
-import type { User } from '../types';
+import { AppHeader } from '@/app/layout/AppHeader';
+import { AuthProvider } from '@/features/auth/AuthContext';
+import type { User } from '@/shared/api/types';
 
 const USER: User = {
   id: 'u1',
@@ -35,31 +35,34 @@ function stubSession(authenticated: boolean) {
   return mock;
 }
 
-function renderTopNav() {
+function renderHeader() {
   return render(
     <MemoryRouter>
       <AuthProvider>
-        <TopNav />
+        <AppHeader />
       </AuthProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
-describe('TopNav', () => {
-  it('omits the auth links from the top bar when signed out', async () => {
+describe('AppHeader', () => {
+  it('shows sign-in and registration links when signed out', async () => {
     stubSession(false);
-    renderTopNav();
+    renderHeader();
 
     expect(await screen.findByRole('link', { name: 'Found It' })).toHaveAttribute('href', '/');
-    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Menu' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('link', { name: 'Create account' })).toHaveAttribute(
+      'href',
+      '/register',
+    );
+    expect(screen.getByRole('button', { name: 'Menu' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /profile/i })).not.toBeInTheDocument();
   });
 
   it('links the avatar to the profile page and omits the profile nav item', async () => {
     stubSession(true);
-    renderTopNav();
+    renderHeader();
 
     const profileLink = await screen.findByRole('link', {
       name: "View walid's profile",
@@ -69,7 +72,7 @@ describe('TopNav', () => {
     expect(screen.queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Found It' })).toHaveAttribute(
       'href',
-      '/dashboard'
+      '/dashboard',
     );
     expect(screen.queryByRole('link', { name: 'Home' })).not.toBeInTheDocument();
   });
@@ -77,14 +80,14 @@ describe('TopNav', () => {
   it('opens the New menu and closes it on outside click', async () => {
     stubSession(true);
     const user = userEvent.setup();
-    renderTopNav();
+    renderHeader();
 
     await screen.findByRole('link', { name: "View walid's profile" });
     await user.click(screen.getByRole('button', { name: /new/i }));
 
     expect(screen.getByRole('link', { name: /post a found item/i })).toHaveAttribute(
       'href',
-      '/items/new'
+      '/items/new',
     );
 
     await user.click(document.body);

@@ -2,8 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from '../features/auth/AuthContext';
-import RegisterPage from '../pages/RegisterPage';
+import { AuthProvider } from '@/features/auth/AuthContext';
+import RegisterPage from '@/features/auth/pages/RegisterPage';
 
 const USER = {
   id: 'u1',
