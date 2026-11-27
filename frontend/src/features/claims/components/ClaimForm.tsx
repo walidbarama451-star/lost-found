@@ -52,8 +52,8 @@ export const ClaimForm = ({ itemId, onSubmitted }: ClaimFormProps): ReactNode =>
           Claim submitted. The listing owner has been notified and can review your private
           message.
         </p>
-        <Link to="/claims" className={buttonClasses('secondary', 'sm', 'mt-4')}>
-          View my claims
+        <Link to="/" className={buttonClasses('secondary', 'sm', 'mt-4')}>
+          Search for a lost item
         </Link>
       </div>
     );

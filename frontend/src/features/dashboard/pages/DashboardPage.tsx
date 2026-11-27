@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardCheck, FileText, PackagePlus, Search } from 'lucide-react';
+import { FileText, PackagePlus, Search } from 'lucide-react';
 import { useAuth } from '@/features/auth/AuthContext';
 import { buttonClasses } from '@/shared/ui/Button';
 
@@ -22,12 +22,6 @@ const actions = [
     icon: FileText,
     title: 'My lost reports',
     description: 'Review saved searches and re-run them when new items are published.',
-  },
-  {
-    to: '/claims',
-    icon: ClipboardCheck,
-    title: 'My claims',
-    description: 'Track the claims you submitted and withdraw any that are still pending.',
   },
 ] as const;
 

@@ -12,7 +12,6 @@ import ItemDetailPage from '@/features/items/pages/ItemDetailPage';
 import ItemEditPage from '@/features/items/pages/ItemEditPage';
 import MyItemsPage from '@/features/items/pages/MyItemsPage';
 import ItemClaimsPage from '@/features/claims/pages/ItemClaimsPage';
-import MyClaimsPage from '@/features/claims/pages/MyClaimsPage';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import UserProfilePage from '@/features/profile/pages/UserProfilePage';
 
@@ -77,14 +76,6 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <MyItemsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'claims',
-        element: (
-          <ProtectedRoute>
-            <MyClaimsPage />
           </ProtectedRoute>
         ),
       },

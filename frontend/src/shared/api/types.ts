@@ -36,15 +36,6 @@ export interface OwnerItem extends PublicItem {
   returnedAt: string | null;
 }
 
-export interface MyClaim {
-  id: string;
-  status: ClaimStatus;
-  message: string;
-  createdAt: string;
-  decisionAt: string | null;
-  item: { id: string; title: string; status: string; thumbnail: string | null };
-}
-
 export type LostReportStatus = 'OPEN' | 'CLOSED';
 
 export type MatchMethod = 'photo' | 'text';

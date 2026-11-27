@@ -97,10 +97,8 @@ Listings are never publicly browsable — there is no `GET /items` list endpoint
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | POST | `/claims` | Yes | Submit claim |
-| GET | `/claims/mine` | Yes | Claims submitted by current user |
 | GET | `/items/:itemId/claims` | Yes + item owner | Claims on own item |
 | PATCH | `/claims/:claimId/decision` | Yes + item owner | Accept or reject |
-| PATCH | `/claims/:claimId/withdraw` | Yes + claimant | Withdraw pending claim |
 
 Submit body:
 ```json

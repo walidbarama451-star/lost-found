@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+import { Claim } from '../src/modules/claims/claim.model.js';
 import { Item } from '../src/modules/items/item.model.js';
 import { app, createItem, registerUser, submitClaim, type TestUser } from './helpers.js';
 
@@ -75,8 +76,8 @@ describe('claim submission', () => {
 
     await request(app).delete(`/api/items/${id}`).set('Cookie', owner.cookie);
 
-    const mine = await request(app).get('/api/claims/mine').set('Cookie', claimant.cookie);
-    expect(mine.body.data.items).toHaveLength(0);
+    const remaining = await Claim.countDocuments({ claimant: claimant.id });
+    expect(remaining).toBe(0);
   });
 
   it('requires authentication', async () => {
@@ -221,7 +222,7 @@ describe('claim decisions', () => {
   });
 });
 
-describe('claim visibility and withdrawal', () => {
+describe('claim visibility', () => {
   it('shows claims only to the listing owner', async () => {
     const owner = await registerUser();
     const claimant = await registerUser({ email: 'claimant@example.com' });
@@ -239,38 +240,6 @@ describe('claim visibility and withdrawal', () => {
 
     const asClaimant = await request(app).get(`/api/items/${id}/claims`).set('Cookie', claimant.cookie);
     expect(asClaimant.status).toBe(403);
-  });
-
-  it('lets the claimant list their own claims and withdraw a pending one', async () => {
-    const owner = await registerUser();
-    const claimant = await registerUser({ email: 'claimant@example.com' });
-    const { id } = await createItem(owner);
-    const claim = (await submitClaim(claimant, id)).body.data.claim;
-
-    const mine = await request(app).get('/api/claims/mine').set('Cookie', claimant.cookie);
-    expect(mine.status).toBe(200);
-    expect(mine.body.data.items).toHaveLength(1);
-    expect(mine.body.data.items[0].item.id).toBe(id);
-
-    const withdraw = await request(app)
-      .patch(`/api/claims/${claim.id}/withdraw`)
-      .set('Cookie', claimant.cookie);
-    expect(withdraw.status).toBe(200);
-    expect(withdraw.body.data.claim.status).toBe('WITHDRAWN');
-
-    const again = await submitClaim(claimant, id);
-    expect(again.status).toBe(201);
-  });
-
-  it('does not let another user withdraw someone else claim', async () => {
-    const owner = await registerUser();
-    const claimant = await registerUser({ email: 'claimant@example.com' });
-    const stranger = await registerUser({ email: 'stranger@example.com' });
-    const { id } = await createItem(owner);
-    const claim = (await submitClaim(claimant, id)).body.data.claim;
-
-    const res = await request(app).patch(`/api/claims/${claim.id}/withdraw`).set('Cookie', stranger.cookie);
-    expect(res.status).toBe(403);
   });
 
   it('marks the listing RETURNED when the owner completes the handover', async () => {

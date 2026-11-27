@@ -3,7 +3,7 @@ import { AppError } from '../../shared/errors/AppError.js';
 import { buildPaginationMeta, parsePagination } from '../../shared/utils/pagination.js';
 import { Item } from '../items/item.model.js';
 import { invalidateCandidatePool } from '../lostReports/lostReport.service.js';
-import { toClaimOnItemDto, toMyClaimDto, type ClaimOnItemDto, type MyClaimDto } from './claim.dto.js';
+import { toClaimOnItemDto, type ClaimOnItemDto } from './claim.dto.js';
 import { Claim, type ClaimDoc, type ClaimRecord } from './claim.model.js';
 
 interface ClaimListResult<T> {
@@ -34,28 +34,6 @@ export async function submitClaim(userId: string, itemId: string, message: strin
 
   await claim.populate('claimant', 'username');
   return toClaimOnItemDto(claim as unknown as Parameters<typeof toClaimOnItemDto>[0]);
-}
-
-export async function listMyClaims(
-  userId: string,
-  query: { page?: number; limit?: number },
-): Promise<ClaimListResult<MyClaimDto>> {
-  const { page, limit } = parsePagination(query);
-  const filter = { claimant: new Types.ObjectId(userId) };
-
-  const [docs, total] = await Promise.all([
-    Claim.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('item', 'title status images'),
-    Claim.countDocuments(filter),
-  ]);
-
-  return {
-    items: docs.map((doc) => toMyClaimDto(doc as unknown as Parameters<typeof toMyClaimDto>[0])),
-    pagination: buildPaginationMeta(page, limit, total),
-  };
 }
 
 export async function listClaimsForItem(
@@ -140,25 +118,4 @@ export async function decideClaim(
   invalidateCandidatePool();
 
   return { id: accepted._id.toString(), status: accepted.status };
-}
-
-export async function withdrawClaim(
-  userId: string,
-  claimId: string,
-): Promise<{ id: string; status: string }> {
-  const updated = await Claim.findOneAndUpdate(
-    { _id: claimId, claimant: userId, status: 'PENDING' },
-    { $set: { status: 'WITHDRAWN', decisionAt: new Date() } },
-    { new: true },
-  );
-
-  if (!updated) {
-    const existing = await Claim.findById(claimId);
-    if (!existing) throw AppError.notFound('Claim not found');
-    if (existing.claimant.toString() !== userId)
-      throw AppError.forbidden('You can only withdraw your own claims');
-    throw AppError.conflict('Only pending claims can be withdrawn');
-  }
-
-  return { id: updated._id.toString(), status: updated.status };
 }

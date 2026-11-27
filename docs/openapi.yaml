@@ -519,17 +519,6 @@ paths:
         '409': { description: Duplicate pending claim or listing not ACTIVE }
         '429': { description: Rate limit exceeded }
 
-  /claims/mine:
-    get:
-      tags: [claims]
-      summary: Claims submitted by the current user
-      security: [{ sessionCookie: [] }]
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200': { description: Paginated claims }
-
   /claims/{claimId}/decision:
     parameters:
       - $ref: '#/components/parameters/claimId'
@@ -550,16 +539,4 @@ paths:
         '200': { description: Decision recorded }
         '403': { description: Not the listing owner }
         '409': { description: Claim already decided or listing no longer claimable }
-
-  /claims/{claimId}/withdraw:
-    parameters:
-      - $ref: '#/components/parameters/claimId'
-    patch:
-      tags: [claims]
-      summary: Claimant withdraws their own pending claim
-      security: [{ sessionCookie: [] }]
-      responses:
-        '200': { description: Withdrawn }
-        '403': { description: Not the claimant }
-        '409': { description: Not pending }
 

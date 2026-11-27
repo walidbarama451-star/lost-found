@@ -9,10 +9,6 @@ export interface ClaimDto {
   decisionAt: string | null;
 }
 
-export interface MyClaimDto extends ClaimDto {
-  item: { id: string; title: string; status: string; thumbnail: string | null };
-}
-
 export interface ClaimOnItemDto extends ClaimDto {
   claimant: { id: string; username: string };
 }
@@ -40,25 +36,6 @@ function baseDto(claim: PopulatedClaim): ClaimDto {
     createdAt: claim.createdAt.toISOString(),
     decisionAt: claim.decisionAt ? claim.decisionAt.toISOString() : null,
   };
-}
-
-export function toMyClaimDto(claim: PopulatedClaim): MyClaimDto {
-  const itemRef = claim.item as {
-    _id: Types.ObjectId;
-    title: string;
-    status: string;
-    images: { url: string }[];
-  };
-  const item =
-    itemRef && typeof itemRef === 'object' && 'title' in itemRef
-      ? {
-          id: itemRef._id.toString(),
-          title: itemRef.title,
-          status: itemRef.status,
-          thumbnail: itemRef.images[0]?.url ?? null,
-        }
-      : { id: String(claim.item), title: 'Listing', status: 'UNKNOWN', thumbnail: null };
-  return { ...baseDto(claim), item };
 }
 
 export function toClaimOnItemDto(claim: PopulatedClaim): ClaimOnItemDto {

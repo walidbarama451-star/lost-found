@@ -1,5 +1,5 @@
 import { apiRequest } from '@/shared/api/client';
-import type { ClaimOnItem, MyClaim, Paginated } from '@/shared/api/types';
+import type { ClaimOnItem, Paginated } from '@/shared/api/types';
 
 export async function submitClaim(itemId: string, message: string): Promise<ClaimOnItem> {
   const data = await apiRequest<{ claim: ClaimOnItem }>('/claims', {
@@ -7,10 +7,6 @@ export async function submitClaim(itemId: string, message: string): Promise<Clai
     body: { itemId, message },
   });
   return data.claim;
-}
-
-export async function listMyClaims(page = 1, limit = 12): Promise<Paginated<MyClaim>> {
-  return apiRequest<Paginated<MyClaim>>('/claims/mine', { query: { page, limit } });
 }
 
 export async function listClaimsOnItem(
@@ -30,13 +26,6 @@ export async function decideClaim(
   const data = await apiRequest<{ claim: ClaimOnItem }>(`/claims/${claimId}/decision`, {
     method: 'PATCH',
     body: { decision },
-  });
-  return data.claim;
-}
-
-export async function withdrawClaim(claimId: string): Promise<ClaimOnItem> {
-  const data = await apiRequest<{ claim: ClaimOnItem }>(`/claims/${claimId}/withdraw`, {
-    method: 'PATCH',
   });
   return data.claim;
 }

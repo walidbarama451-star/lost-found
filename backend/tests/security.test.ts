@@ -44,8 +44,8 @@ describe('security and privacy', () => {
     const { id } = await createItem(owner);
     await submitClaim(claimant, id);
 
-    const myClaims = await request(app).get('/api/claims/mine').set('Cookie', stranger.cookie);
-    expect(myClaims.body.data.items).toHaveLength(0);
+    const res = await request(app).get(`/api/items/${id}/claims`).set('Cookie', stranger.cookie);
+    expect(res.status).toBe(403);
   });
 
   it('rejects cross-origin mutating requests', async () => {

@@ -118,7 +118,7 @@ Base URL `http://localhost:5000/api` — full contract in [`docs/openapi.yaml`](
 | Profile | `GET /users/me`, `PATCH /users/me`, `GET /users/:userId` (public profile: username + Discord) |
 | Items | `POST /items`, `GET /items/mine`, `GET /items/:id` (owner + matched searchers only), `PATCH /items/:id`, `DELETE /items/:id`, `PATCH /items/:id/return`, `POST /items/:id/images`, `DELETE /items/:id/images/:publicId` |
 | Lost reports | `POST /lost-reports`, `GET /lost-reports`, `GET /lost-reports/:id`, `POST /lost-reports/:id/search`, `PATCH /lost-reports/:id`, `DELETE /lost-reports/:id` |
-| Claims | `POST /claims`, `GET /claims/mine`, `GET /items/:id/claims`, `PATCH /claims/:id/decision`, `PATCH /claims/:id/withdraw` |
+| Claims | `POST /claims`, `GET /items/:id/claims`, `PATCH /claims/:id/decision` |
 
 Every response uses `{ success, data, message? }` / `{ success, false, message, errors[] }` envelopes.
 
